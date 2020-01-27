@@ -53,7 +53,7 @@ function build(triggerID) {
 		    "type": "modal",
 			"title": {
 				"type": "plain_text",
-				"text": "Your project update"
+				"text": "Your project status update"
 			},
 			"submit": {
 				"type": "plain_text",
@@ -88,17 +88,51 @@ function build(triggerID) {
 					]
 				},
 				{
-					"type": "actions",
-					"elements": [
-						{
-							"type": "datepicker",
-							"initial_date": Utils.dateFormat(new Date()),
-							"placeholder": {
-								"type": "plain_text",
-								"text": "Release date"
-							}
+					"type": "input",
+					"block_id":"product_name",
+					"element": {
+						"type": "plain_text_input",
+						"action_id": "product_name_text",
+						"placeholder": {
+							"type": "plain_text",
+							"text": "e.g myFT, Apps, FT.com, etc."
 						}
-					]
+					},
+					"label": {
+						"type": "plain_text",
+						"text": "Product name"
+					}
+				},
+				{
+					"type": "input",
+					"block_id":"product_phase",
+					"element": {
+						"type": "plain_text_input",
+						"action_id": "product_phase_text",
+						"placeholder": {
+							"type": "plain_text",
+							"text": "e.g. A/B Test, Stabilisation, Upgrade, etc."
+						}
+					},
+					"label": {
+						"type": "plain_text",
+						"text": "Product phase"
+					}
+				},
+				{
+					"type": "input",
+					"element":{
+						"type": "datepicker",
+						"initial_date": Utils.dateFormat(new Date()),
+						"placeholder": {
+							"type": "plain_text",
+							"text": "Release date"
+						}
+					},
+					"label": {
+						"type": "plain_text",
+						"text": "Release date"
+					}
 				}
 			]
 		}

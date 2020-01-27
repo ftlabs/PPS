@@ -21,7 +21,7 @@ app.post('/add', (req,res) => {
 		method: 'POST',
 		body:    JSON.stringify(payload),
 		headers: { 
-			'Content-Type': 'application/json',
+			'Content-Type': 'application/json; charset=utf-8',
 			'Authorization': 'Bearer ' + process.env.SLACK_TOKEN,
 		}
 	};
@@ -38,7 +38,7 @@ app.post('/add', (req,res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-	console.log('Submit', response);
+	console.log('Submit', JSON.stringify(response.view.state));
 	// const actionType = response.actions[0].type;
 	// console.log('act::', actionType, response.actions.length)
 	// console.log(response);
