@@ -53,7 +53,7 @@ function build(triggerID) {
 		    "type": "modal",
 			"title": {
 				"type": "plain_text",
-				"text": "Your project status update"
+				"text": "Project status update"
 			},
 			"submit": {
 				"type": "plain_text",
@@ -121,8 +121,10 @@ function build(triggerID) {
 				},
 				{
 					"type": "input",
+					"block_id": "release_date",
 					"element":{
 						"type": "datepicker",
+						"action_id": "release_date_text",
 						"initial_date": Utils.dateFormat(new Date()),
 						"placeholder": {
 							"type": "plain_text",

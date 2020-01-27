@@ -21,7 +21,7 @@ app.post('/add', (req,res) => {
 		method: 'POST',
 		body:    JSON.stringify(payload),
 		headers: { 
-			'Content-Type': 'application/json; charset=utf-8',
+			'Content-Type': 'application/json',
 			'Authorization': 'Bearer ' + process.env.SLACK_TOKEN,
 		}
 	};
@@ -29,30 +29,58 @@ app.post('/add', (req,res) => {
 	return fetch(`https://slack.com/api/views.open`, options)
 			.then(response => response.json())
 			.then(data => {
-				//TODO: check data status and handle error
 				console.log('D::', data)
-				res.end();
+
+				if(data.ok) {
+					res.end();
+				} else {
+					//TODO: throw Error here and focus the error handling throughout the app.
+					res.send('We have issues processing the request, contact the app admin');
+				}
 			})
 			.catch(err => console.log(err));
 });
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-	console.log('Submit', JSON.stringify(response.view.state));
-	// const actionType = response.actions[0].type;
-	// console.log('act::', actionType, response.actions.length)
-	// console.log(response);
+	// console.log('Submit', JSON.stringify(response));
+	const actionType = response.type;
+	let viewID;
 
 	// const blockID = response.actions[0].block_id;
 	// console.log('it\'s still going to submit');
 
 	//TODO: handle validation for all actions
 
-	res.json({
-	  "response_action": "clear"
-	});
+	switch(actionType) {
+		case 'view_submission':
+			viewID = response.view.id;
+			const user = response.user.name;
+			const values = response.view.state.values;
+			const submission = Input.submit(viewID, user, values);
 
-// 	switch(actionType) {
+			if(submission) {
+				await Sheet.write(submission, () => {
+					Input.deleteView(viewID);
+
+					return res.json({
+					  "response_action": "clear"
+					});
+				});
+			} else {
+				//TODO: send/display error
+				console.log('No block to submit');
+				return res.sendStatus(200);	
+			}
+		break;
+
+		case 'block_actions':
+			viewID = response.container.view_id;
+			const property = response.actions[0].action_id;
+			Input.add(viewID, property, response.actions[0].selected_option.value);
+			console.log(response.actions);
+			return res.sendStatus(200);
+		break;
 // 		case 'button':
 // 			const user = response.user.name;
 // 			const submission = Input.submit(blockID, user);
@@ -83,7 +111,9 @@ app.post('/submit', async (req, res) => {
 // 			Input.add(blockID, 'releaseDate', response.actions[0].selected_date);
 // 			return res.sendStatus(200);
 // 		break;
-// 	}
+	}
+
+	console.log('VIEW', viewID);
 });
 
 async function setUpStructure() {
