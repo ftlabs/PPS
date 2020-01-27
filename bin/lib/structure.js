@@ -45,56 +45,64 @@ function formatOptions(arr) {
 	return options;
 }
 
-function build() {
-	//block types "section" vs "actions"
+function build(triggerID) {
 
 	const payload = {
-		// ???? Any interactive components used within input blocks will not send this block_actions payload. They are included in view_submission payloads only.
-		//https://api.slack.com/reference/interaction-payloads/block-actions
-		"blocks": [
-			{ 
-				"type": "actions",
-				"elements": [
-					{
-						"type": "static_select",
-						"action_id": "mission",
-						"placeholder": {
-							"type": "plain_text",
-							"text": "Pick a Mission"
+		"trigger_id": triggerID,
+	  	"view": {
+		    "type": "modal",
+			"title": {
+				"type": "plain_text",
+				"text": "Your project update"
+			},
+			"submit": {
+				"type": "plain_text",
+				"text": "Submit"
+			},
+			"close": {
+				"type": "plain_text",
+				"text": "Cancel"
+			},
+			"blocks": [
+				{ 
+					"type": "actions",
+					"elements": [
+						{
+							"type": "static_select",
+							"action_id": "mission",
+							"placeholder": {
+								"type": "plain_text",
+								"text": "Pick a Mission"
+							},
+			 				options: formatOptions(this.missionValues)
 						},
-		 				options: formatOptions(this.missionValues)
-					},
-					{
-						"type": "static_select",
-						"action_id": "releaseType",
-						"placeholder": {
-							"type": "plain_text",
-							"text": "Pick a Type"
-						},
-		 				options: formatOptions(this.typeValues)
-					},
-					{
-						"type": "datepicker",
-						"initial_date": Utils.dateFormat(new Date()),
-						"placeholder": {
-							"type": "plain_text",
-							"text": "Release date"
+						{
+							"type": "static_select",
+							"action_id": "releaseType",
+							"placeholder": {
+								"type": "plain_text",
+								"text": "Pick a Type"
+							},
+			 				options: formatOptions(this.typeValues)
 						}
-					},
-					{
-						"type": "button",
-						"action_id": "submit",
-						"text": {
-							"type": "plain_text",
-							"text": "Submit"
-						},
-						"style": "primary",
-						"value": "submit"
-					}
-				]
-			}
-		]
-	}
+					]
+				},
+				{
+					"type": "actions",
+					"elements": [
+						{
+							"type": "datepicker",
+							"initial_date": Utils.dateFormat(new Date()),
+							"placeholder": {
+								"type": "plain_text",
+								"text": "Release date"
+							}
+						}
+					]
+				}
+			]
+		}
+	};
 
 	return payload;
 }
