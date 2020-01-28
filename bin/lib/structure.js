@@ -64,28 +64,39 @@ function build(triggerID) {
 				"text": "Cancel"
 			},
 			"blocks": [
-				{ 
-					"type": "actions",
-					"elements": [
-						{
-							"type": "static_select",
-							"action_id": "mission",
-							"placeholder": {
-								"type": "plain_text",
-								"text": "Pick a Mission"
-							},
-			 				options: formatOptions(this.missionValues)
+				{
+					"type": "input",
+					"block_id":"mission",
+					"element": {
+						"type": "static_select",
+						"action_id": "mission_select",
+						"placeholder": {
+							"type": "plain_text",
+							"text": "Pick a Mission"
 						},
-						{
-							"type": "static_select",
-							"action_id": "releaseType",
+		 				options: formatOptions(this.missionValues)
+					},
+					"label": {
+						"type": "plain_text",
+						"text": "Mission"
+					}
+				},
+				{
+					"type": "input",
+					"block_id":"release_type",
+					"element": {
+						"type": "static_select",
+						"action_id": "type_select",
 							"placeholder": {
 								"type": "plain_text",
 								"text": "Pick a Type"
 							},
 			 				options: formatOptions(this.typeValues)
-						}
-					]
+					},
+					"label": {
+						"type": "plain_text",
+						"text": "Release Type"
+					}
 				},
 				{
 					"type": "input",
