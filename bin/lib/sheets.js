@@ -25,7 +25,7 @@ async function writeToSheet({...msg}, callback) {
 			    sheet.addRow(msg, (err, data) => {
 			  		console.log('ERR::', err);
 			  		console.log('DATA::', data);
-			  		callback();
+			  		callback(data);
 				});
 			});
 		}

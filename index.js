@@ -49,12 +49,9 @@ app.post('/submit', async (req, res) => {
 	const values = response.view.state.values;
 	const submission = Input.submit(viewID, user, values);
 
-	await Sheet.write(submission, () => {
+	await Sheet.write(submission, data => {
 		Input.deleteView(viewID);
-
-		return res.json({
-		  "response_action": "clear"
-		});
+		return res.json(Structure.confirm(data, res));
 	});
 });
 

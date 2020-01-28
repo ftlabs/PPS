@@ -1,6 +1,8 @@
 const Sheet = require('./sheets');
 const Utils = require('./utils');
 
+const CLOSE_TIMEOUT = 30;
+
 async function init() {
 	this.missionValues = await getValues('Mission');
 	this.typeValues = await getValues('Type');
@@ -154,9 +156,36 @@ function build(triggerID) {
 	return payload;
 }
 
+function confirm({...values}) {
+	return {
+	  "response_action": "update",
+	  "view": {
+	    "type": "modal",
+	    "title": {
+	      "type": "plain_text",
+	      "text": "Update received"
+	    },
+	    "close": {
+			"type": "plain_text",
+			"text": "Close"
+		},
+	    "blocks": [
+	      {
+	        "type": "section",
+	        "text": {
+	          "type": "mrkdwn",
+	          "text": `Added row: \`${values.mission} | ${values.releasetype} | ${values.productname} | ${values.productphase} | ${values.releasedate}\``
+	        }
+	      }
+	    ]
+	  }
+	};
+};
+
 module.exports = { 
 	init,
 	getMissions,
 	getTypes,
-	build
+	build,
+	confirm
 };
