@@ -1,27 +1,29 @@
 const Utils = require('./utils');
 
-const blocks = {};
+const views = {};
 const template = {
 	'mission': '',
 	'releaseType': '',
 	'releaseDate': 0,
+	'productName': '',
+	'productPhase': '',
 	'productOwner': 'anonymous',
 	'submitted': null,
 	'submitter': null
 };
 
-function add(blockID, property, value) {
-	checkExisting(blockID, true);
+function add(viewID, property, value) {
+	checkExisting(viewID, true);
 
-	blocks[blockID][property] = value;
+	views[viewID][property] = value;
 
-	console.log(`ADDED: ${property} for ${blockID}`);
+	console.log(`ADDED: ${property} for ${viewID}`);
 }
 
-function checkExisting(blockID, create = false) {
-	if(blocks[blockID] === undefined) {
+function checkExisting(viewID, create = false) {
+	if(views[viewID] === undefined) {
 		if(create) {
-			blocks[blockID] = template;	
+			views[viewID] = template;	
 		}
 		return false;
 	} else {
@@ -29,28 +31,33 @@ function checkExisting(blockID, create = false) {
 	}
 }
 
-function deleteBlock (blockID) {
-	delete blocks[blockID];
+function deleteView (viewID) {
+	delete views[viewID];
 }
 
-function submit(blockID, user) {
+function submit(viewID, user, values) {
 	//TODO: check if exists, validate, etc.
-	console.log('BLOCK ID', blockID);
+	console.log('VIEWID::Sub', viewID);
 	
-	if(checkExisting(blockID)) {
-		blocks[blockID].submitter = user;
-		blocks[blockID].submitted = new Date().toISOString(); 
-		if(blocks[blockID].releaseDate === 0) {
-			blocks[blockID].releaseDate = Utils.dateFormat(new Date());
+	if(checkExisting(viewID)) {
+		console.log('EXISTING');
+		views[viewID].productName = values.product_name.product_name_text.value;
+		views[viewID].productPhase = values.product_phase.product_phase_text.value;	
+		views[viewID].releaseDate =  values.release_date.release_date_text.selected_date;
+		
+		views[viewID].submitter = user;
+		views[viewID].submitted = new Date().toISOString();
+
+		if(views[viewID].productOwner === 'anonymous') {
+			views[viewID].productOwner = user;
 		}
 
-		if(blocks[blockID].productOwner === 'anonymous') {
-			blocks[blockID].productOwner = user;
-		}
 
-		return blocks[blockID];	
+		console.log('SUB::', views[viewID]);
+		return views[viewID];	
 	}
 
+	console.log('does not exist');
 	return false;
 }
 
@@ -62,5 +69,5 @@ function validate() {
 module.exports = {
 	add,
 	submit,
-	deleteBlock
+	deleteView
 }

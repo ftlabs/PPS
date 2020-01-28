@@ -45,56 +45,100 @@ function formatOptions(arr) {
 	return options;
 }
 
-function build() {
-	//block types "section" vs "actions"
+function build(triggerID) {
 
 	const payload = {
-		// ???? Any interactive components used within input blocks will not send this block_actions payload. They are included in view_submission payloads only.
-		//https://api.slack.com/reference/interaction-payloads/block-actions
-		"blocks": [
-			{ 
-				"type": "actions",
-				"elements": [
-					{
-						"type": "static_select",
-						"action_id": "mission",
+		"trigger_id": triggerID,
+	  	"view": {
+		    "type": "modal",
+			"title": {
+				"type": "plain_text",
+				"text": "Project status update"
+			},
+			"submit": {
+				"type": "plain_text",
+				"text": "Submit"
+			},
+			"close": {
+				"type": "plain_text",
+				"text": "Cancel"
+			},
+			"blocks": [
+				{ 
+					"type": "actions",
+					"elements": [
+						{
+							"type": "static_select",
+							"action_id": "mission",
+							"placeholder": {
+								"type": "plain_text",
+								"text": "Pick a Mission"
+							},
+			 				options: formatOptions(this.missionValues)
+						},
+						{
+							"type": "static_select",
+							"action_id": "releaseType",
+							"placeholder": {
+								"type": "plain_text",
+								"text": "Pick a Type"
+							},
+			 				options: formatOptions(this.typeValues)
+						}
+					]
+				},
+				{
+					"type": "input",
+					"block_id":"product_name",
+					"element": {
+						"type": "plain_text_input",
+						"action_id": "product_name_text",
 						"placeholder": {
 							"type": "plain_text",
-							"text": "Pick a Mission"
-						},
-		 				options: formatOptions(this.missionValues)
+							"text": "e.g myFT, Apps, FT.com, etc."
+						}
 					},
-					{
-						"type": "static_select",
-						"action_id": "releaseType",
+					"label": {
+						"type": "plain_text",
+						"text": "Product name"
+					}
+				},
+				{
+					"type": "input",
+					"block_id":"product_phase",
+					"element": {
+						"type": "plain_text_input",
+						"action_id": "product_phase_text",
 						"placeholder": {
 							"type": "plain_text",
-							"text": "Pick a Type"
-						},
-		 				options: formatOptions(this.typeValues)
+							"text": "e.g. A/B Test, Stabilisation, Upgrade, etc."
+						}
 					},
-					{
+					"label": {
+						"type": "plain_text",
+						"text": "Product phase"
+					}
+				},
+				{
+					"type": "input",
+					"block_id": "release_date",
+					"element":{
 						"type": "datepicker",
+						"action_id": "release_date_text",
 						"initial_date": Utils.dateFormat(new Date()),
 						"placeholder": {
 							"type": "plain_text",
 							"text": "Release date"
 						}
 					},
-					{
-						"type": "button",
-						"action_id": "submit",
-						"text": {
-							"type": "plain_text",
-							"text": "Submit"
-						},
-						"style": "primary",
-						"value": "submit"
+					"label": {
+						"type": "plain_text",
+						"text": "Release date"
 					}
-				]
-			}
-		]
-	}
+				}
+			]
+		}
+	};
 
 	return payload;
 }

@@ -2,6 +2,7 @@ if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
 
 const PORT = process.env.PORT || 2020;
 
@@ -14,51 +15,65 @@ app.use(bodyParser.urlencoded({ extended: true }));
 setUpStructure();
 
 app.post('/add', (req,res) => {
-	const payload = Structure.build();
+	const payload = Structure.build(req.body.trigger_id);
 
-	res.send(payload);
+	const options = {
+		method: 'POST',
+		body:    JSON.stringify(payload),
+		headers: { 
+			'Content-Type': 'application/json',
+			'Authorization': 'Bearer ' + process.env.SLACK_TOKEN,
+		}
+	};
+
+	return fetch(`https://slack.com/api/views.open`, options)
+			.then(response => response.json())
+			.then(data => {
+				console.log('D::', data)
+
+				if(data.ok) {
+					res.end();
+				} else {
+					//TODO: throw Error here and focus the error handling throughout the app.
+					res.send('We have issues processing the request, contact the app admin');
+				}
+			})
+			.catch(err => console.log(err));
 });
-
-
-//TODO: look into view_submission for better handling/block structure management, and output completion
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-	const actionType = response.actions[0].type;
-	console.log('act::', actionType, response.actions.length)
-	console.log(response);
+	const actionType = response.type;
+	let viewID;
 
-	const blockID = response.actions[0].block_id;
+	//TODO: handle validation for all actions
 
 	switch(actionType) {
-		case 'button':
+		case 'view_submission':
+			viewID = response.view.id;
 			const user = response.user.name;
-			const submission = Input.submit(blockID, user);
+			const values = response.view.state.values;
+			const submission = Input.submit(viewID, user, values);
 
 			if(submission) {
 				await Sheet.write(submission, () => {
-					Input.deleteBlock(blockID);
+					Input.deleteView(viewID);
 
-					//TODO: replace the text/collapse block;
-					return res.send('New row added');
+					return res.json({
+					  "response_action": "clear"
+					});
 				});
 			} else {
 				//TODO: send/display error
 				console.log('No block to submit');
 				return res.sendStatus(200);	
 			}
-			
 		break;
 
-		case 'static_select':
+		case 'block_actions':
+			viewID = response.container.view_id;
 			const property = response.actions[0].action_id;
-			Input.add(blockID, property, response.actions[0].selected_option.value);
-			
-			return res.sendStatus(200);
-		break;
-
-		case 'datepicker':
-			Input.add(blockID, 'releaseDate', response.actions[0].selected_date);
+			Input.add(viewID, property, response.actions[0].selected_option.value);
 			return res.sendStatus(200);
 		break;
 	}
