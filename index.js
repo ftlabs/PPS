@@ -1,6 +1,10 @@
 if (process.env.NODE_ENV !== 'production') require('dotenv').config();
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const app = express();
+const helmet = require('helmet');
+const express_enforces_ssl = require('express-enforces-ssl');
 const bodyParser = require('body-parser');
 const fetch = require('node-fetch');
 
@@ -9,6 +13,15 @@ const PORT = process.env.PORT || 2020;
 const Sheet = require('./bin/lib/sheets');
 const Structure = require('./bin/lib/structure');
 const Input = require('./bin/lib/inputManagement');
+
+if (process.env.NODE_ENV === 'production') {
+	app.use(helmet());
+	app.enable('trust proxy');
+	app.use(express_enforces_ssl());
+
+	const googleTokenPath = path.resolve(`${__dirname}/keyfile.json`);
+	fs.writeFileSync(googleTokenPath, process.env.GOOGLE_CREDS);
+}
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
