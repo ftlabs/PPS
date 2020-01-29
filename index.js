@@ -44,39 +44,15 @@ app.post('/add', (req,res) => {
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
 	const actionType = response.type;
-	let viewID;
+	const viewID = response.view.id;
+	const user = response.user.name;
+	const values = response.view.state.values;
+	const submission = Input.submit(viewID, user, values);
 
-	//TODO: handle validation for all actions
-
-	switch(actionType) {
-		case 'view_submission':
-			viewID = response.view.id;
-			const user = response.user.name;
-			const values = response.view.state.values;
-			const submission = Input.submit(viewID, user, values);
-
-			if(submission) {
-				await Sheet.write(submission, () => {
-					Input.deleteView(viewID);
-
-					return res.json({
-					  "response_action": "clear"
-					});
-				});
-			} else {
-				//TODO: send/display error
-				console.log('No block to submit');
-				return res.sendStatus(200);	
-			}
-		break;
-
-		case 'block_actions':
-			viewID = response.container.view_id;
-			const property = response.actions[0].action_id;
-			Input.add(viewID, property, response.actions[0].selected_option.value);
-			return res.sendStatus(200);
-		break;
-	}
+	await Sheet.write(submission, data => {
+		Input.deleteView(viewID);
+		return res.json(Structure.confirm(data, res));
+	});
 });
 
 async function setUpStructure() {

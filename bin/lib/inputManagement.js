@@ -12,62 +12,31 @@ const template = {
 	'submitter': null
 };
 
-function add(viewID, property, value) {
-	checkExisting(viewID, true);
-
-	views[viewID][property] = value;
-
-	console.log(`ADDED: ${property} for ${viewID}`);
-}
-
-function checkExisting(viewID, create = false) {
-	if(views[viewID] === undefined) {
-		if(create) {
-			views[viewID] = template;	
-		}
-		return false;
-	} else {
-		return true;
-	}
-}
-
 function deleteView (viewID) {
 	delete views[viewID];
 }
 
 function submit(viewID, user, values) {
-	//TODO: check if exists, validate, etc.
-	console.log('VIEWID::Sub', viewID);
+	views[viewID] = template;
 	
-	if(checkExisting(viewID)) {
-		console.log('EXISTING');
-		views[viewID].productName = values.product_name.product_name_text.value;
-		views[viewID].productPhase = values.product_phase.product_phase_text.value;	
-		views[viewID].releaseDate =  values.release_date.release_date_text.selected_date;
-		
-		views[viewID].submitter = user;
-		views[viewID].submitted = new Date().toISOString();
+	views[viewID].mission = values.mission.mission_select.selected_option.value;
+	views[viewID].releaseType = values.release_type.type_select.selected_option.value;
 
-		if(views[viewID].productOwner === 'anonymous') {
-			views[viewID].productOwner = user;
-		}
+	views[viewID].productName = values.product_name.product_name_text.value;
+	views[viewID].productPhase = values.product_phase.product_phase_text.value;	
+	views[viewID].releaseDate =  values.release_date.release_date_text.selected_date;
+	
+	views[viewID].submitter = user;
+	views[viewID].submitted = new Date().toISOString();
 
-
-		console.log('SUB::', views[viewID]);
-		return views[viewID];	
+	if(views[viewID].productOwner === 'anonymous') {
+		views[viewID].productOwner = user;
 	}
 
-	console.log('does not exist');
-	return false;
-}
-
-function validate() {
-	//TODO: ensure all fields have been filled before writing + exists
-	return;
+	return views[viewID];
 }
 
 module.exports = {
-	add,
 	submit,
 	deleteView
 }
