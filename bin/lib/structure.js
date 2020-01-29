@@ -1,8 +1,6 @@
 const Sheet = require('./sheets');
 const Utils = require('./utils');
 
-const CLOSE_TIMEOUT = 30;
-
 async function init() {
 	this.missionValues = await getValues('Mission');
 	this.typeValues = await getValues('Type');
@@ -174,7 +172,7 @@ function confirm({...values}) {
 	        "type": "section",
 	        "text": {
 	          "type": "mrkdwn",
-	          "text": `Added row: \`${values.mission} | ${values.releasetype} | ${values.productname} | ${values.productphase} | ${values.releasedate}\``
+	          "text": `Added row: \`\`\`${values.mission} | ${values.releasetype} | ${values.productname} | ${values.productphase} | ${values.releasedate}\`\`\``
 	        }
 	      }
 	    ]
