@@ -56,18 +56,18 @@ app.post('/add', (req,res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-
-	// console.log(response);
 	const actionType = response.type;
 	const viewID = response.view.id;
 	const user = response.user.name;
 	const values = response.view.state.values;
 	const submission = Input.submit(viewID, user, values);
 
-	await Sheet.write(submission, data => {
-		Input.deleteView(viewID);
-		return res.json(Structure.confirm(data, res));
-	});
+	if(submission) {	
+		return await Sheet.write(submission, data => {
+			Input.deleteView(viewID);
+			return res.json(Structure.confirm(data, res));
+		});
+	}
 });
 
 async function setUpStructure() {

@@ -14,11 +14,11 @@ const template = {
 
 function deleteView (viewID) {
 	delete views[viewID];
-	console.log('VIEWS_DEL::', views);
 }
 
-function submit(viewID, user, values) {	
-	console.log('NEW VIEW', template);
+function submit(viewID, user, values) {
+	if(views[viewID] !== undefined) return false;
+	
 	views[viewID] = {...template};
 	
 	views[viewID].mission = values.mission.mission_select.selected_option.value;
@@ -32,12 +32,9 @@ function submit(viewID, user, values) {
 	views[viewID].submitted = new Date().toISOString();
 
 	if(views[viewID].productOwner === 'anonymous') {
-		console.log('USER2::', user);
 		views[viewID].productOwner = user;
 	}
 
-
-	console.log('VIEWS::', views);
 	return views[viewID];
 }
 
