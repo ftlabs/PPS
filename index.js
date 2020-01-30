@@ -56,6 +56,8 @@ app.post('/add', (req,res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
+
+	// console.log(response);
 	const actionType = response.type;
 	const viewID = response.view.id;
 	const user = response.user.name;

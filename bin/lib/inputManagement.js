@@ -14,6 +14,7 @@ const template = {
 
 function deleteView (viewID) {
 	delete views[viewID];
+	console.log('VIEWS_DEL::', views);
 }
 
 function submit(viewID, user, values) {
@@ -29,15 +30,13 @@ function submit(viewID, user, values) {
 	views[viewID].submitter = user;
 	views[viewID].submitted = new Date().toISOString();
 
-	console.log('VIEW ID::', viewID);
-	console.log('USER::', user);
-	console.log('PO1:', views[viewID].productOwner);
-
 	if(views[viewID].productOwner === 'anonymous') {
 		console.log('USER2::', user);
 		views[viewID].productOwner = user;
 	}
 
+
+	console.log('VIEWS::', views);
 	return views[viewID];
 }
 
