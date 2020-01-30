@@ -19,7 +19,7 @@ function deleteView (viewID) {
 
 function submit(viewID, user, values) {	
 	console.log('NEW VIEW', template);
-	views[viewID] = template;
+	views[viewID] = {...template};
 	
 	views[viewID].mission = values.mission.mission_select.selected_option.value;
 	views[viewID].releaseType = values.release_type.type_select.selected_option.value;
