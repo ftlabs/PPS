@@ -17,7 +17,9 @@ function deleteView (viewID) {
 }
 
 function submit(viewID, user, values) {
-	views[viewID] = template;
+	if(views[viewID] !== undefined) return false;
+	
+	views[viewID] = {...template};
 	
 	views[viewID].mission = values.mission.mission_select.selected_option.value;
 	views[viewID].releaseType = values.release_type.type_select.selected_option.value;

@@ -62,10 +62,12 @@ app.post('/submit', async (req, res) => {
 	const values = response.view.state.values;
 	const submission = Input.submit(viewID, user, values);
 
-	await Sheet.write(submission, data => {
-		Input.deleteView(viewID);
-		return res.json(Structure.confirm(data, res));
-	});
+	if(submission) {	
+		return await Sheet.write(submission, data => {
+			Input.deleteView(viewID);
+			return res.json(Structure.confirm(data, res));
+		});
+	}
 });
 
 async function setUpStructure() {
