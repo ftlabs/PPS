@@ -29,7 +29,12 @@ function submit(viewID, user, values) {
 	views[viewID].submitter = user;
 	views[viewID].submitted = new Date().toISOString();
 
+	console.log('VIEW ID::', viewID);
+	console.log('USER::', user);
+	console.log('PO1:', views[viewID].productOwner);
+
 	if(views[viewID].productOwner === 'anonymous') {
+		console.log('USER2::', user);
 		views[viewID].productOwner = user;
 	}
 
