@@ -27,31 +27,36 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 setUpStructure();
 
-app.post('/add', (req,res) => {
-	const payload = Structure.build(req.body.trigger_id);
+app.post('/add', (req, res) => {
+	const private_metadata = {
+		channel: req.body.channel,
+		response_url: req.body.response_url
+	}
+
+	const payload = Structure.build(req.body.trigger_id, private_metadata);
 
 	const options = {
 		method: 'POST',
-		body:    JSON.stringify(payload),
-		headers: { 
+		body: JSON.stringify(payload),
+		headers: {
 			'Content-Type': 'application/json',
-			'Authorization': 'Bearer ' + process.env.SLACK_TOKEN,
+			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
 		}
 	};
 
 	return fetch(`https://slack.com/api/views.open`, options)
-			.then(response => response.json())
-			.then(data => {
-				console.log('D::', data)
+		.then(response => response.json())
+		.then(data => {
+			console.log('D::', data);
 
-				if(data.ok) {
-					res.end();
-				} else {
-					//TODO: throw Error here and focus the error handling throughout the app.
-					res.send('We have issues processing the request, contact the app admin');
-				}
-			})
-			.catch(err => console.log(err));
+			if (data.ok) {
+				res.end();
+			} else {
+				//TODO: throw Error here and focus the error handling throughout the app.
+				res.send('We have issues processing the request, contact the app admin');
+			}
+		})
+		.catch(err => console.log(err));
 });
 
 app.post('/submit', async (req, res) => {
@@ -60,18 +65,61 @@ app.post('/submit', async (req, res) => {
 	const viewID = response.view.id;
 	const user = response.user.name;
 	const values = response.view.state.values;
+	const private_metadata = JSON.parse(response.view.private_metadata);
+	const response_url = private_metadata.response_url;
 	const submission = Input.submit(viewID, user, values);
 
+	const response_msg_process = Structure.processing(submission.productName);
+	postData(response_url, response_msg_process);
+
 	if(submission) {	
-		return await Sheet.write(submission, data => {
+		Sheet.write(submission, data => {
 			Input.deleteView(viewID);
-			return res.json(Structure.confirm(data, res));
+
+			// testing only - remove later
+			wait(4000);
+
+			const response_msg_confirm = Structure.confirm(data);
+			postData(response_url, response_msg_confirm);
 		});
 	}
+
+	return res.json(Structure.clear());
 });
+
+async function postData(url, data) {
+	const options = {
+		method: 'POST',
+		body: JSON.stringify(data),
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
+		}
+	};
+
+	return fetch(url, options)
+		.then(response => response.json())
+		.then(data => {
+			if (data.ok) {
+				//res.end();
+			} else {
+				//TODO: throw Error here and focus the error handling throughout the app.
+				//res.send('We have issues processing the request, contact the app admin');
+			}
+		})
+		.catch(err => console.log(err));
+}
 
 async function setUpStructure() {
 	await Structure.init();
+}
+
+function wait(ms) {
+	var start = new Date().getTime();
+	var end = start;
+	while (end < start + ms) {
+		end = new Date().getTime();
+	}
 }
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
