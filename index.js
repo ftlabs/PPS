@@ -61,7 +61,6 @@ app.post('/add', (req, res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-	const actionType = response.type;
 	const viewID = response.view.id;
 	const user = response.user.name;
 	const values = response.view.state.values;
@@ -75,9 +74,6 @@ app.post('/submit', async (req, res) => {
 	if(submission) {	
 		Sheet.write(submission, data => {
 			Input.deleteView(viewID);
-
-			// testing only - remove later
-			wait(4000);
 
 			const response_msg_confirm = Structure.confirm(data);
 			postData(response_url, response_msg_confirm);
@@ -98,13 +94,10 @@ async function postData(url, data) {
 	};
 
 	return fetch(url, options)
-		.then(response => response.json())
-		.then(data => {
-			if (data.ok) {
-				//res.end();
-			} else {
-				//TODO: throw Error here and focus the error handling throughout the app.
-				//res.send('We have issues processing the request, contact the app admin');
+		.then(response => {
+			if(response.error != null ){
+				console.log('error')
+				console.log(error)
 			}
 		})
 		.catch(err => console.log(err));
