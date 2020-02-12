@@ -96,8 +96,7 @@ async function postData(url, data) {
 	return fetch(url, options)
 		.then(response => {
 			if(response.error != null ){
-				console.log('error')
-				console.log(error)
+				throw error;
 			}
 		})
 		.catch(err => console.log(err));
