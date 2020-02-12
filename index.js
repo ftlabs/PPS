@@ -107,12 +107,4 @@ async function setUpStructure() {
 	await Structure.init();
 }
 
-function wait(ms) {
-	var start = new Date().getTime();
-	var end = start;
-	while (end < start + ms) {
-		end = new Date().getTime();
-	}
-}
-
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
