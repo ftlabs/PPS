@@ -180,10 +180,37 @@ function confirm({...values}) {
 	};
 };
 
+function summary(values){
+	let message = "";
+	values.forEach(item => {
+		message += `• ${item.mission} : ${item.count} \n `;
+	});
+
+	return {
+		"blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "Summary count of all missions: "
+				}
+			},
+			{
+			  "type": "section",
+			  "text": {
+				"type": "mrkdwn",
+				"text": `${message}`
+				}
+			}
+		]
+	}
+}
+
 module.exports = { 
 	init,
 	getMissions,
 	getTypes,
 	build,
-	confirm
+	confirm,
+	summary
 };

@@ -70,6 +70,19 @@ app.post('/submit', async (req, res) => {
 	}
 });
 
+app.post('/summary', async (req, res) => {
+	return await Sheet.read('Summary', 'value', data => {
+		const output = [];
+		data.forEach(item => {
+			output.push({
+				mission: item.mission,
+				count: item.count
+			});
+		});
+		return res.json(Structure.summary(output));
+	});
+});
+
 async function setUpStructure() {
 	await Structure.init();
 }
