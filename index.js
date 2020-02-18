@@ -56,7 +56,6 @@ app.post('/add', (req,res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-	const actionType = response.type;
 	const viewID = response.view.id;
 	const user = response.user.name;
 	const values = response.view.state.values;
@@ -71,15 +70,30 @@ app.post('/submit', async (req, res) => {
 });
 
 app.post('/summary', async (req, res) => {
-	return await Sheet.read('Summary', 'value', data => {
+	const parameter = req.body.text;
+	
+	return await Sheet.read('Report', 'value', async(data) => {
 		const output = [];
 		data.forEach(item => {
-			output.push({
-				mission: item.mission,
-				count: item.count
-			});
+			output.push(item.value);
 		});
-		return res.json(Structure.summary(output));
+
+		if(parameter === ''){
+			return res.json(Structure.summaryList(output));
+		} else if(parameter && output.includes(parameter)) {
+			return await Sheet.read(parameter, 'value', data => {
+				const output = [];
+				data.forEach(item => {
+					output.push({
+						mission: item.mission,
+						count: item.count
+					});
+				});
+				return res.json(Structure.summary(output));
+			});
+		} else {
+			return res.json(Structure.error("No summary by that name"));
+		}
 	});
 });
 

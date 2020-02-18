@@ -180,6 +180,32 @@ function confirm({...values}) {
 	};
 };
 
+function summaryList(values){
+	let message = "";
+	values.forEach(item => {
+		message += `• ${item} \n `;
+	});
+
+	return {
+		"blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "Available summaries: "
+				}
+			},
+			{
+			  "type": "section",
+			  "text": {
+				"type": "mrkdwn",
+				"text": `${message}`
+				}
+			}
+		]
+	}
+}
+
 function summary(values){
 	let message = "";
 	values.forEach(item => {
@@ -206,11 +232,34 @@ function summary(values){
 	}
 }
 
+function error(value){
+	return {
+		"blocks": [
+			{
+				"type": "section",
+				"text": {
+					"type": "mrkdwn",
+					"text": "An error was detected"
+				}
+			},
+			{
+			  "type": "section",
+			  "text": {
+				"type": "mrkdwn",
+				"text": `\`\`\`${value}\`\`\``
+				}
+			}
+		]
+	}
+}
+
 module.exports = { 
 	init,
 	getMissions,
 	getTypes,
 	build,
 	confirm,
-	summary
+	summaryList,
+	summary,
+	error
 };
