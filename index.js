@@ -86,8 +86,6 @@ app.post('/submit', async (req, res) => {
 					count: item.count
 				});
 			});
-			console.log(output);
-			//return res.json(Structure.summary(output));
 			
 			const response_msg_summary = Structure.summary(output);
 			postData(response_url, response_msg_summary);
