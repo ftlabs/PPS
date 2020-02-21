@@ -56,17 +56,46 @@ app.post('/add', (req,res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-	const viewID = response.view.id;
 	const user = response.user.name;
-	const values = response.view.state.values;
-	const submission = Input.submit(viewID, user, values);
 
-	if(submission) {	
-		return await Sheet.write(submission, data => {
-			Input.deleteView(viewID);
-			return res.json(Structure.confirm(data, res));
+	if(response.hasOwnProperty('view')){
+		// reply to modal submission
+
+		const viewID = response.view.id;
+		const values = response.view.state.values;
+		const submission = Input.submit(viewID, user, values);
+
+		if(submission) {	
+			return await Sheet.write(submission, data => {
+				Input.deleteView(viewID);
+				return res.json(Structure.confirm(data, res));
+			});
+		}
+	} else {
+		// handle other posts
+
+		const parsedPayload = JSON.parse(req.body.payload);
+		const parameter = parsedPayload.actions[0].selected_option.text.text;
+		const response_url = parsedPayload.response_url;
+
+		return await Sheet.read(parameter, 'value', data => {
+			const output = [];
+			data.forEach(item => {
+				output.push({
+					mission: item.mission,
+					count: item.count
+				});
+			});
+			console.log(output);
+			//return res.json(Structure.summary(output));
+			
+			const response_msg_summary = Structure.summary(output);
+			postData(response_url, response_msg_summary);
+
+			return res.sendStatus(200);
 		});
 	}
+	
 });
 
 app.post('/summary', async (req, res) => {
@@ -99,6 +128,25 @@ app.post('/summary', async (req, res) => {
 
 async function setUpStructure() {
 	await Structure.init();
+}
+
+async function postData(url, data) {
+	const options = {
+		method: 'POST',
+		body: JSON.stringify(data),
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
+		}
+	};
+
+	return fetch(url, options)
+		.then(response => {
+			if(response.error != null ){
+				throw error;
+			}
+		})
+		.catch(err => console.log(err));
 }
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));

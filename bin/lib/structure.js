@@ -181,9 +181,17 @@ function confirm({...values}) {
 };
 
 function summaryList(values){
-	let message = "";
+	const options = [];
+
 	values.forEach(item => {
-		message += `• ${item} \n `;
+		options.push({
+			"text": {
+				"type": "plain_text",
+				"text": `${item}`,
+				"emoji": true
+			},
+			"value": `report||${item}`
+		});
 	});
 
 	return {
@@ -192,14 +200,16 @@ function summaryList(values){
 				"type": "section",
 				"text": {
 					"type": "mrkdwn",
-					"text": "Available summaries: "
-				}
-			},
-			{
-			  "type": "section",
-			  "text": {
-				"type": "mrkdwn",
-				"text": `${message}`
+					"text": "PPS summaries available: "
+				},
+				"accessory": {
+					"type": "static_select",
+					"placeholder": {
+						"type": "plain_text",
+						"text": "Select an item",
+						"emoji": true
+					},
+					"options": options
 				}
 			}
 		]
