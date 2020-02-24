@@ -67,7 +67,7 @@ app.post('/submit', async (req, res) => {
 app.post('/summary', async (req, res) => {
 	const parameter = req.body.text;
 	
-	return await Sheet.read('Report', 'value', async(data) => {
+	return await Sheet.read('Report', 'value', async(headers, data) => {
 		const output = [];
 		data.forEach(item => {
 			output.push(item.value);
@@ -76,7 +76,7 @@ app.post('/summary', async (req, res) => {
 		if(parameter === ''){
 			return res.json(Structure.summaryList(output));
 		} else if(parameter && output.includes(parameter)) {
-			return await Sheet.read(parameter, 'value', data => {
+			return await Sheet.read(parameter, 'value', (headers, data) => {
 				const output = [];
 				data.forEach(item => {
 					output.push({
@@ -113,29 +113,20 @@ async function summaryResponse(req, res){
 	const parameter = parsedPayload.actions[0].selected_option.text.text;
 	const response_url = parsedPayload.response_url;
 
-	return await Sheet.read(parameter, 'value', data => {
-		const output = [];
+	return await Sheet.read(parameter, 'value', (headers, data) => {
+		const rows = [];
 
-		switch(parameter){
-			case 'Report_Test':
-				data.forEach(item => {
-					output.push({
-						releasetype: item.releasetype,
-						count: item.count,
-						notes: item.notes
-					});
-				});
-				break;
-			default:
-				data.forEach(item => {
-					output.push({
-						mission: item.mission,
-						count: item.count
-					});
-				});
-		}
+		data.forEach(item => {
+			const row = [];
+			for (const property in item) {
+				if(headers.includes(property)){
+					row.push(item[property]);
+				}
+			}
+			rows.push(row);
+		});
 
-		const response_msg_summary = Structure.summary(parameter, output);
+		const response_msg_summary = Structure.summary(parameter, headers, rows);
 		postData(response_url, response_msg_summary);
 
 		return res.sendStatus(200);
@@ -164,5 +155,6 @@ async function postData(url, data) {
 		})
 		.catch(err => console.log(err));
 }
+
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));

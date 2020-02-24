@@ -3,6 +3,8 @@ const async = require('async');
 
 let doc = new GoogleSpreadsheet(process.env.SHEET_ID);
 let sheet;
+let headers;
+let rows;
 
 async function writeToSheet({...msg}, callback) {
 	return async.series([
@@ -62,14 +64,32 @@ async function readSheet(worksheet = 'Main', sortCol='mission', callback) {
 				step();
 		    });
 		},
+		readHeaders = step => {
+			sheet.getCells({
+				"max-row": 1
+		    }, (err, readHeaders ) => {
+				console.log('Read '+readHeaders.length+' headers');
+				
+				headers = readHeaders.map(item => {
+					return item._value.toLowerCase();
+				});
+
+				step();
+		    });
+		},
 		readRows = step => {
 			//NB row query format https://developers.google.com/sheets/api/v3/data#send_a_structured_query_for_rows
 			sheet.getRows({
 				orderby: sortCol
-		    }, (err, rows ) => {
-		    	console.log('Read '+rows.length+' rows');
-		    	callback(rows);
+		    }, (err, readRows ) => {
+		    	console.log('Read '+readRows.length+' rows');
+				//callback(rows);
+				rows = readRows;
+				step();
 		    });
+		},
+		initCallback = step => {
+			callback(headers, rows);
 		}
 	], err =>{
     	if( err ) {

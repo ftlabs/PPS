@@ -1,5 +1,6 @@
 const Sheet = require('./sheets');
 const Utils = require('./utils');
+const AsciiTable = require('ascii-table')
 
 async function init() {
 	this.missionValues = await getValues('Mission');
@@ -10,7 +11,7 @@ async function init() {
 
 async function getValues(sheetName) {
 	return new Promise((resolve, reject) => {
-		Sheet.read(sheetName, 'value', data => {
+		Sheet.read(sheetName, 'value', (headers, data) => {
 			const output = [];
 			data.forEach(item => {
 				output.push(item.value);
@@ -216,24 +217,7 @@ function summaryList(values){
 	}
 }
 
-function summary(type, values){
-	let message = "";
-	let title = "";
-
-	switch(type){
-		case 'Report_Test':
-			title = "Summary count of all release types: ";
-			values.forEach(item => {
-				message += `• ${item.releasetype} : ${item.count} : ${item.notes} \n `;
-			});
-			break;
-		default:
-			title = "Summary count of all missions: ";
-			values.forEach(item => {
-				message += `• ${item.mission} : ${item.count} \n `;
-			});
-	}
-
+function summary(title, headers, rows){
 	return {
 		"blocks": [
 			{
@@ -247,11 +231,20 @@ function summary(type, values){
 			  "type": "section",
 			  "text": {
 				"type": "mrkdwn",
-				"text": `${message}`
+				"text": `\`\`\`${createAsciiTable(title, headers, rows)}\`\`\``
 				}
 			}
 		]
 	}
+}
+
+function createAsciiTable(title, headers, rows){
+	let table = new AsciiTable(title)
+	table.setHeading(headers);
+	rows.forEach(row => {
+		table.addRow(row);
+	});
+	return table.toString();
 }
 
 function error(value){
