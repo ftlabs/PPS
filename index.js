@@ -115,14 +115,27 @@ async function summaryResponse(req, res){
 
 	return await Sheet.read(parameter, 'value', data => {
 		const output = [];
-		data.forEach(item => {
-			output.push({
-				mission: item.mission,
-				count: item.count
-			});
-		});
-		
-		const response_msg_summary = Structure.summary(output);
+
+		switch(parameter){
+			case 'Report_Test':
+				data.forEach(item => {
+					output.push({
+						releasetype: item.releasetype,
+						count: item.count,
+						notes: item.notes
+					});
+				});
+				break;
+			default:
+				data.forEach(item => {
+					output.push({
+						mission: item.mission,
+						count: item.count
+					});
+				});
+		}
+
+		const response_msg_summary = Structure.summary(parameter, output);
 		postData(response_url, response_msg_summary);
 
 		return res.sendStatus(200);

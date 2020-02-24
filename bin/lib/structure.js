@@ -216,11 +216,23 @@ function summaryList(values){
 	}
 }
 
-function summary(values){
+function summary(type, values){
 	let message = "";
-	values.forEach(item => {
-		message += `• ${item.mission} : ${item.count} \n `;
-	});
+	let title = "";
+
+	switch(type){
+		case 'Report_Test':
+			title = "Summary count of all release types: ";
+			values.forEach(item => {
+				message += `• ${item.releasetype} : ${item.count} : ${item.notes} \n `;
+			});
+			break;
+		default:
+			title = "Summary count of all missions: ";
+			values.forEach(item => {
+				message += `• ${item.mission} : ${item.count} \n `;
+			});
+	}
 
 	return {
 		"blocks": [
@@ -228,7 +240,7 @@ function summary(values){
 				"type": "section",
 				"text": {
 					"type": "mrkdwn",
-					"text": "Summary count of all missions: "
+					"text": `${title}`
 				}
 			},
 			{
