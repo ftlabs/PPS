@@ -2,6 +2,7 @@ const GoogleSpreadsheet = require('google-spreadsheet');
 const async = require('async');
 
 let doc = new GoogleSpreadsheet(process.env.SHEET_ID);
+let worksheet_id;
 let sheet;
 let headers;
 let rows;
@@ -64,6 +65,13 @@ async function readSheet(worksheet = 'Main', sortCol = 'mission', headersFlag = 
 
 					// console.log('worksheetID', worksheetID);
 					sheet = info.worksheets[worksheetID];
+
+					Object.values(sheet._links).forEach(link => {
+						if (link.includes('gid')) {
+							worksheet_id = findGid(link);
+						}
+					});
+
 					// console.log('sheet 1: '+sheet.title+' '+sheet.rowCount+'x'+sheet.colCount);
 					step();
 				});
@@ -103,7 +111,7 @@ async function readSheet(worksheet = 'Main', sortCol = 'mission', headersFlag = 
 				);
 			}),
 			(initCallback = step => {
-				callback(rows, headers);
+				callback(rows, headers, worksheet_id);
 			})
 		],
 		err => {
@@ -112,6 +120,12 @@ async function readSheet(worksheet = 'Main', sortCol = 'mission', headersFlag = 
 			}
 		}
 	);
+}
+
+function findGid(str) {
+	const regex = /(?<=gid=)([0-9]*)/gm;
+	let match = str.match(regex);
+	return match[0];
 }
 
 module.exports = {

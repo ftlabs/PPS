@@ -252,35 +252,56 @@ function summaryList(values) {
 	};
 }
 
-function summary(name, headers, rows) {
+function summary(name, headers, rows, worksheet_id) {
 	const { title, description } = getReport(this.reportValues, name);
 	const table = createAsciiTable(title, headers, rows);
 	return {
 		blocks: [
 			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: `${description}`
-				}
+				type: 'divider'
 			},
 			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: `\`\`\`${table}\`\`\``
-				}
+				type: 'context',
+				elements: [
+					{
+						type: 'mrkdwn',
+						text: `${title} report requested on ${Utils.dateFormat(
+							new Date()
+						)} \n Full report: https://docs.google.com/spreadsheets/d/${process.env.SHEET_ID}/edit#gid=${worksheet_id}`
+					}
+				]
+			}
+		],
+		attachments: [
+			{
+				blocks: [
+					{
+						type: 'section',
+						text: {
+							type: 'mrkdwn',
+							text: `*${description}*`
+						}
+					},
+					{
+						type: 'section',
+						text: {
+							type: 'mrkdwn',
+							text: `\`\`\`${table}\`\`\``
+						}
+					}
+				]
 			}
 		]
 	};
 }
 
 function createAsciiTable(title, headers, rows) {
-	let table = new AsciiTable(title);
+	let table = new AsciiTable();
 	table.setHeading(headers);
 	rows.forEach(row => {
 		table.addRow(row);
 	});
+	table.setTitleAlignLeft();
 	return table.toString();
 }
 

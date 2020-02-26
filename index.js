@@ -89,7 +89,7 @@ app.post('/summary', async (req, res) => {
 	if (parameter === '') {
 		return res.json(Structure.summaryList(titles));
 	} else if (parameter && titles.includes(parameter)) {
-		return await Sheet.read(parameter, 'value', true, (data, headers) => {
+		return await Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
 			postSummary(response_url, parameter, headers, data);
 			return res.sendStatus(200);
 		});
@@ -103,13 +103,13 @@ async function summaryResponse(req, res) {
 	const parameter = parsedPayload.actions[0].selected_option.text.text;
 	const response_url = parsedPayload.response_url;
 
-	return await Sheet.read(parameter, 'value', true, (data, headers) => {
-		postSummary(response_url, parameter, headers, data);
+	return await Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
+		postSummary(response_url, parameter, headers, data, worksheet_id);
 		return res.sendStatus(200);
 	});
 }
 
-async function postSummary(url, name, headers, data) {
+async function postSummary(url, name, headers, data, worksheet_id) {
 	const rows = [];
 
 	data.forEach(item => {
@@ -122,7 +122,7 @@ async function postSummary(url, name, headers, data) {
 		rows.push(row);
 	});
 
-	postData(url, Structure.summary(name, headers, rows));
+	postData(url, Structure.summary(name, headers, rows, worksheet_id));
 }
 
 async function postData(url, data) {
