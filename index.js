@@ -62,7 +62,7 @@ app.post('/add', (req, res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-  
+
 	if (response.hasOwnProperty('view')) {
 		return modalResponse(req, res);
 	} else {
@@ -73,7 +73,6 @@ app.post('/submit', async (req, res) => {
 async function modalResponse(req, res) {
 	const response = JSON.parse(req.body.payload);
 	const user = response.user.name;
-
 	const viewID = response.view.id;
 	const values = response.view.state.values;
 	const private_metadata = JSON.parse(response.view.private_metadata);
