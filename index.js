@@ -62,7 +62,7 @@ app.post('/add', (req, res) => {
 
 app.post('/submit', async (req, res) => {
 	const response = JSON.parse(req.body.payload);
-
+  
 	if (response.hasOwnProperty('view')) {
 		return modalResponse(req, res);
 	} else {
@@ -110,6 +110,8 @@ app.post('/summary', async (req, res) => {
 	} else {
 		return res.json(Structure.error('No summary by that name'));
 	}
+
+	return res.json(Structure.clear());
 });
 
 async function summaryResponse(req, res) {

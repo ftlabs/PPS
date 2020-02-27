@@ -99,8 +99,8 @@ function build(triggerID, private_metadata) {
 				type: 'plain_text',
 				text: 'Cancel'
 			},
-			private_metadata: JSON.stringify(private_metadata),
-			blocks: [
+			"private_metadata": JSON.stringify(private_metadata),
+			"blocks": [
 				{
 					type: 'input',
 					block_id: 'mission',
