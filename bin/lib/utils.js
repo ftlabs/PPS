@@ -13,4 +13,4 @@ function wait(ms) {
 module.exports = {
 	dateFormat,
 	wait
-}
+};
