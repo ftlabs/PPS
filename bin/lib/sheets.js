@@ -123,7 +123,7 @@ async function readSheet(worksheet = 'Main', sortCol = 'mission', headersFlag = 
 }
 
 function findGid(str) {
-	const regex = /(?<=gid=)([0-9]*)/gm;
+	const regex = /(?<=gid=)([0-9]*)/m;
 	let match = str.match(regex);
 	return match[0];
 }

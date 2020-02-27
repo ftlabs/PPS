@@ -2,6 +2,15 @@ function dateFormat(date) {
 	return new Date(date).toISOString().split('T')[0];
 }
 
-module.exports = {
-	dateFormat
+function wait(ms) {
+	var start = new Date().getTime();
+	var end = start;
+	while (end < start + ms) {
+		end = new Date().getTime();
+	}
 }
+
+module.exports = {
+	dateFormat,
+	wait
+};

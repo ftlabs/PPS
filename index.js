@@ -29,7 +29,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 setUpStructure();
 
 app.post('/add', (req, res) => {
-	const payload = Structure.build(req.body.trigger_id);
+	const private_metadata = {
+		channel: req.body.channel,
+		response_url: req.body.response_url
+	};
+
+	const payload = Structure.build(req.body.trigger_id, private_metadata);
 
 	const options = {
 		method: 'POST',
@@ -71,14 +76,23 @@ async function modalResponse(req, res) {
 
 	const viewID = response.view.id;
 	const values = response.view.state.values;
+	const private_metadata = JSON.parse(response.view.private_metadata);
+	const response_url = private_metadata.response_url;
 	const submission = Input.submit(viewID, user, values);
 
+	const response_msg_process = Structure.processing(submission.productName);
+	postData(response_url, response_msg_process);
+
 	if (submission) {
-		return await Sheet.write(submission, data => {
+		Sheet.write(submission, data => {
 			Input.deleteView(viewID);
-			return res.json(Structure.confirm(data, res));
+
+			const response_msg_confirm = Structure.confirm(data);
+			postData(response_url, response_msg_confirm);
 		});
 	}
+
+	return res.json(Structure.clear());
 }
 
 app.post('/summary', async (req, res) => {

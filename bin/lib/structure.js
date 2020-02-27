@@ -82,7 +82,7 @@ function formatOptions(arr) {
 	return options;
 }
 
-function build(triggerID) {
+function build(triggerID, private_metadata) {
 	const payload = {
 		trigger_id: triggerID,
 		view: {
@@ -99,6 +99,7 @@ function build(triggerID) {
 				type: 'plain_text',
 				text: 'Cancel'
 			},
+			private_metadata: JSON.stringify(private_metadata),
 			blocks: [
 				{
 					type: 'input',
@@ -190,29 +191,37 @@ function build(triggerID) {
 	return payload;
 }
 
+function clear() {
+	return {
+		response_action: 'clear'
+	};
+}
+
+function processing(productName) {
+	return {
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `New row request for *${productName}* received. Processing...`
+				}
+			}
+		]
+	};
+}
+
 function confirm({ ...values }) {
 	return {
-		response_action: 'update',
-		view: {
-			type: 'modal',
-			title: {
-				type: 'plain_text',
-				text: 'Update received'
-			},
-			close: {
-				type: 'plain_text',
-				text: 'Close'
-			},
-			blocks: [
-				{
-					type: 'section',
-					text: {
-						type: 'mrkdwn',
-						text: `Added row: \`\`\`${values.mission} | ${values.releasetype} | ${values.productname} | ${values.productphase} | ${values.releasedate}\`\`\``
-					}
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `Added row: \`\`\`${values.mission} | ${values.releasetype} | ${values.productname} | ${values.productphase} | ${values.releasedate}\`\`\``
 				}
-			]
-		}
+			}
+		]
 	};
 }
 
@@ -333,6 +342,9 @@ module.exports = {
 	getReports,
 	getReportTitles,
 	build,
+	processing,
+	confirm,
+	clear,
 	confirm,
 	summaryList,
 	summary,
