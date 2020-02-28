@@ -99,8 +99,8 @@ function build(triggerID, private_metadata) {
 				type: 'plain_text',
 				text: 'Cancel'
 			},
-			"private_metadata": JSON.stringify(private_metadata),
-			"blocks": [
+			private_metadata: JSON.stringify(private_metadata),
+			blocks: [
 				{
 					type: 'input',
 					block_id: 'mission',
@@ -225,8 +225,9 @@ function confirm({ ...values }) {
 	};
 }
 
-function summaryList(values) {
+function summaryList(values, message = '') {
 	const options = [];
+	let blockMessage = '';
 
 	values.forEach(item => {
 		options.push({
@@ -239,7 +240,9 @@ function summaryList(values) {
 		});
 	});
 
-	return {
+	//TODO: update this block message option
+
+	const output = {
 		blocks: [
 			{
 				type: 'section',
@@ -259,6 +262,8 @@ function summaryList(values) {
 			}
 		]
 	};
+
+	return output;
 }
 
 function summary(name, headers, rows, worksheet_id) {

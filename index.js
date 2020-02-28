@@ -79,6 +79,8 @@ async function modalResponse(req, res) {
 	const response_url = private_metadata.response_url;
 	const submission = Input.submit(viewID, user, values);
 
+	// 1. Send a Slack message to the user confirming reception
+	//    of the add entry request
 	const response_msg_process = Structure.processing(submission.productName);
 	postData(response_url, response_msg_process);
 
@@ -86,11 +88,14 @@ async function modalResponse(req, res) {
 		Sheet.write(submission, data => {
 			Input.deleteView(viewID);
 
+			// 2. Send a Slack message confirming that the contents
+			//    of the request was added to the data store
 			const response_msg_confirm = Structure.confirm(data);
 			postData(response_url, response_msg_confirm);
 		});
 	}
 
+	// 3. Send a Slack message to clear the Slack modal form window
 	return res.json(Structure.clear());
 }
 
@@ -100,14 +105,15 @@ app.post('/summary', async (req, res) => {
 	const titles = Structure.getReportTitles();
 
 	if (parameter === '') {
+		// Send list
 		return res.json(Structure.summaryList(titles));
 	} else if (parameter && titles.includes(parameter)) {
 		return await Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
-			postSummary(response_url, parameter, headers, data);
+			postSummary(response_url, parameter, headers, data, worksheet_id);
 			return res.sendStatus(200);
 		});
 	} else {
-		return res.json(Structure.error('No summary by that name'));
+		return res.json(Structure.summaryList(titles, 'No summary by that name'));
 	}
 
 	return res.json(Structure.clear());
