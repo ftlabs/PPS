@@ -227,8 +227,11 @@ function confirm({ ...values }) {
 
 function summaryList(values, message = '') {
 	const options = [];
-	let blockMessage = '';
+	const output = {
+		blocks: []
+	};
 
+	// Generate list of Report options for Slack drop down list
 	values.forEach(item => {
 		options.push({
 			text: {
@@ -240,28 +243,34 @@ function summaryList(values, message = '') {
 		});
 	});
 
-	//TODO: update this block message option
-
-	const output = {
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: 'PPS summaries available: '
-				},
-				accessory: {
-					type: 'static_select',
-					placeholder: {
-						type: 'plain_text',
-						text: 'Select an item',
-						emoji: true
-					},
-					options: options
-				}
+	// Add message section if message has been provided
+	if (message && message !== '') {
+		output.blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `${message}`
 			}
-		]
-	};
+		});
+	}
+
+	// Add drop down list of Reports to response
+	output.blocks.push({
+		type: 'section',
+		text: {
+			type: 'mrkdwn',
+			text: 'PPS summaries available: '
+		},
+		accessory: {
+			type: 'static_select',
+			placeholder: {
+				type: 'plain_text',
+				text: 'Select an item',
+				emoji: true
+			},
+			options: options
+		}
+	});
 
 	return output;
 }
