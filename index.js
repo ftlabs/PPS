@@ -89,10 +89,11 @@ app.post('/summary', async (req, res) => {
 	if (parameter === '') {
 		return res.json(Structure.summaryList(titles));
 	} else if (parameter && titles.includes(parameter)) {
-		return await Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
-			postSummary(response_url, parameter, headers, data);
-			return res.sendStatus(200);
+		Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
+			postSummary(response_url, parameter, headers, data, worksheet_id);
 		});
+
+		return res.json(Structure.processingReport(parameter));
 	} else {
 		return res.json(Structure.error('No summary by that name'));
 	}
@@ -103,10 +104,11 @@ async function summaryResponse(req, res) {
 	const parameter = parsedPayload.actions[0].selected_option.text.text;
 	const response_url = parsedPayload.response_url;
 
-	return await Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
+	Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
 		postSummary(response_url, parameter, headers, data, worksheet_id);
-		return res.sendStatus(200);
 	});
+
+	return res.json(Structure.processingReport(parameter));
 }
 
 async function postSummary(url, name, headers, data, worksheet_id) {
@@ -122,7 +124,9 @@ async function postSummary(url, name, headers, data, worksheet_id) {
 		rows.push(row);
 	});
 
-	Util.postJSONData(url, Structure.summary(name, headers, rows, worksheet_id));
+	const summary = await Structure.summary(name, headers, rows, worksheet_id);
+
+	Util.postJSONData(url, summary);
 }
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));

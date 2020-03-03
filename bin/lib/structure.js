@@ -163,6 +163,20 @@ function confirm({ ...values }) {
 	};
 }
 
+function processingReport(reportName) {
+	return {
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `Report request for *${reportName}* received. Processing...`
+				}
+			}
+		]
+	};
+}
+
 function summaryList(values) {
 	const options = [];
 
@@ -199,11 +213,8 @@ function summaryList(values) {
 	};
 }
 
-function summary(name, headers, rows, worksheet_id) {
-	console.log('a');
-	const { title, description } = getReport(name);
-	console.log('b');
-	console.log('title');
+async function summary(name, headers, rows, worksheet_id) {
+	const { title, description } = await getReport(name);
 
 	const table = createAsciiTable(headers, rows);
 	return {
@@ -246,15 +257,15 @@ function summary(name, headers, rows, worksheet_id) {
 	};
 }
 
-async function getReport(name) {
-	const reports = await DataRequest.getReports();
-	const foundProps = reports.filter(report => {
-		if (report.title === name) {
-			console.log(report);
-			return report;
-		}
+function getReport(name) {
+	return DataRequest.getReports().then(reports => {
+		const foundProps = reports.filter(report => {
+			if (report.title === name) {
+				return report;
+			}
+		});
+		return foundProps[0];
 	});
-	return foundProps[0];
 }
 
 function createAsciiTable(headers, rows) {
@@ -294,6 +305,7 @@ module.exports = {
 	confirm,
 	clear,
 	confirm,
+	processingReport,
 	summaryList,
 	summary,
 	error
