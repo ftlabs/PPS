@@ -7,13 +7,14 @@ const app = express();
 const helmet = require('helmet');
 const express_enforces_ssl = require('express-enforces-ssl');
 const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
 
 const PORT = process.env.PORT || 2020;
 
+const Util = require('./bin/lib/utils');
 const Sheet = require('./bin/lib/sheets');
 const Structure = require('./bin/lib/structure');
 const Input = require('./bin/lib/inputManagement');
+const DataReq = require('./bin/lib/dataRequest');
 
 if (process.env.NODE_ENV === 'production') {
 	app.use(helmet());
@@ -26,7 +27,6 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-setUpStructure();
 
 app.post('/add', (req, res) => {
 	const private_metadata = {
@@ -36,28 +36,15 @@ app.post('/add', (req, res) => {
 
 	const payload = Structure.build(req.body.trigger_id, private_metadata);
 
-	const options = {
-		method: 'POST',
-		body: JSON.stringify(payload),
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
+	return Util.postJSONData(`https://slack.com/api/views.open`, payload, response => {
+		const data = response.json();
+		if (data.ok) {
+			res.end();
+		} else {
+			//TODO: throw Error here and focus the error handling throughout the app.
+			res.send('We have issues processing the request, contact the app admin');
 		}
-	};
-
-	return fetch(`https://slack.com/api/views.open`, options)
-		.then(response => response.json())
-		.then(data => {
-			console.log('D::', data);
-
-			if (data.ok) {
-				res.end();
-			} else {
-				//TODO: throw Error here and focus the error handling throughout the app.
-				res.send('We have issues processing the request, contact the app admin');
-			}
-		})
-		.catch(err => console.log(err));
+	});
 });
 
 app.post('/submit', async (req, res) => {
@@ -78,16 +65,16 @@ async function modalResponse(req, res) {
 	const private_metadata = JSON.parse(response.view.private_metadata);
 	const response_url = private_metadata.response_url;
 	const submission = Input.submit(viewID, user, values);
-
 	const response_msg_process = Structure.processing(submission.productName);
-	postData(response_url, response_msg_process);
+
+	Util.postJSONData(response_url, response_msg_process);
 
 	if (submission) {
 		Sheet.write(submission, data => {
 			Input.deleteView(viewID);
 
 			const response_msg_confirm = Structure.confirm(data);
-			postData(response_url, response_msg_confirm);
+			Util.postJSONData(response_url, response_msg_confirm);
 		});
 	}
 
@@ -97,7 +84,7 @@ async function modalResponse(req, res) {
 app.post('/summary', async (req, res) => {
 	const parameter = req.body.text;
 	const response_url = req.body.response_url;
-	const titles = Structure.getReportTitles();
+	const titles = await DataReq.getReportTitles();
 
 	if (parameter === '') {
 		return res.json(Structure.summaryList(titles));
@@ -109,8 +96,6 @@ app.post('/summary', async (req, res) => {
 	} else {
 		return res.json(Structure.error('No summary by that name'));
 	}
-
-	return res.json(Structure.clear());
 });
 
 async function summaryResponse(req, res) {
@@ -137,30 +122,7 @@ async function postSummary(url, name, headers, data, worksheet_id) {
 		rows.push(row);
 	});
 
-	postData(url, Structure.summary(name, headers, rows, worksheet_id));
-}
-
-async function postData(url, data) {
-	const options = {
-		method: 'POST',
-		body: JSON.stringify(data),
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
-		}
-	};
-
-	return fetch(url, options)
-		.then(response => {
-			if (response.error != null) {
-				throw error;
-			}
-		})
-		.catch(err => console.log(err));
-}
-
-async function setUpStructure() {
-	await Structure.init();
+	Util.postJSONData(url, Structure.summary(name, headers, rows, worksheet_id));
 }
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));

@@ -1,70 +1,6 @@
-const Sheet = require('./sheets');
 const Utils = require('./utils');
+const DataRequest = require('./dataRequest');
 const AsciiTable = require('ascii-table');
-
-async function init() {
-	this.missionValues = await getValues('Mission');
-	this.typeValues = await getValues('Type');
-	this.reportValues = await getReportValues('Report');
-
-	return this;
-}
-
-async function getValues(sheetName) {
-	return new Promise((resolve, reject) => {
-		Sheet.read(sheetName, 'value', false, data => {
-			const output = [];
-			data.forEach(item => {
-				output.push(item.value);
-			});
-
-			resolve(output);
-		});
-	});
-}
-
-async function getReportValues(sheetName) {
-	return new Promise((resolve, reject) => {
-		Sheet.read(sheetName, 'value', false, data => {
-			const output = [];
-			data.forEach(item => {
-				output.push({
-					title: item.title,
-					description: item.description
-				});
-			});
-
-			resolve(output);
-		});
-	});
-}
-
-function getMissions() {
-	return this.missionValues;
-}
-
-function getTypes() {
-	return this.typeValues;
-}
-
-function getReports() {
-	return this.reportValues;
-}
-
-function getReportTitles() {
-	return this.reportValues.map(report => {
-		return report.title;
-	});
-}
-
-function getReport(reportValues, name) {
-	const foundProps = reportValues.filter(obj => {
-		if (obj.title === name) {
-			return obj;
-		}
-	});
-	return foundProps[0];
-}
 
 function formatOptions(arr) {
 	const options = [];
@@ -83,6 +19,8 @@ function formatOptions(arr) {
 }
 
 function build(triggerID, private_metadata) {
+	const missions = DataRequest.getMissions();
+	const types = DataRequest.getTypes();
 	const payload = {
 		trigger_id: triggerID,
 		view: {
@@ -99,8 +37,8 @@ function build(triggerID, private_metadata) {
 				type: 'plain_text',
 				text: 'Cancel'
 			},
-			"private_metadata": JSON.stringify(private_metadata),
-			"blocks": [
+			private_metadata: JSON.stringify(private_metadata),
+			blocks: [
 				{
 					type: 'input',
 					block_id: 'mission',
@@ -111,7 +49,7 @@ function build(triggerID, private_metadata) {
 							type: 'plain_text',
 							text: 'Pick a Mission'
 						},
-						options: formatOptions(this.missionValues)
+						options: formatOptions(missions)
 					},
 					label: {
 						type: 'plain_text',
@@ -128,7 +66,7 @@ function build(triggerID, private_metadata) {
 							type: 'plain_text',
 							text: 'Pick a Type'
 						},
-						options: formatOptions(this.typeValues)
+						options: formatOptions(types)
 					},
 					label: {
 						type: 'plain_text',
@@ -262,8 +200,12 @@ function summaryList(values) {
 }
 
 function summary(name, headers, rows, worksheet_id) {
-	const { title, description } = getReport(this.reportValues, name);
-	const table = createAsciiTable(title, headers, rows);
+	console.log('a');
+	const { title, description } = getReport(name);
+	console.log('b');
+	console.log('title');
+
+	const table = createAsciiTable(headers, rows);
 	return {
 		blocks: [
 			{
@@ -304,7 +246,18 @@ function summary(name, headers, rows, worksheet_id) {
 	};
 }
 
-function createAsciiTable(title, headers, rows) {
+async function getReport(name) {
+	const reports = await DataRequest.getReports();
+	const foundProps = reports.filter(report => {
+		if (report.title === name) {
+			console.log(report);
+			return report;
+		}
+	});
+	return foundProps[0];
+}
+
+function createAsciiTable(headers, rows) {
 	let table = new AsciiTable();
 	table.setHeading(headers);
 	rows.forEach(row => {
@@ -336,11 +289,6 @@ function error(value) {
 }
 
 module.exports = {
-	init,
-	getMissions,
-	getTypes,
-	getReports,
-	getReportTitles,
 	build,
 	processing,
 	confirm,
