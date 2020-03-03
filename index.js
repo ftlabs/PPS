@@ -7,6 +7,7 @@ const app = express();
 const helmet = require('helmet');
 const express_enforces_ssl = require('express-enforces-ssl');
 const bodyParser = require('body-parser');
+const fetch = require('node-fetch');
 
 const PORT = process.env.PORT || 2020;
 
@@ -28,22 +29,35 @@ if (process.env.NODE_ENV === 'production') {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/add', (req, res) => {
+app.post('/add', async (req, res) => {
 	const private_metadata = {
 		channel: req.body.channel,
 		response_url: req.body.response_url
 	};
 
-	const payload = Structure.build(req.body.trigger_id, private_metadata);
+	const payload = await Structure.build(req.body.trigger_id, private_metadata);
 
-	return Util.postJSONData(`https://slack.com/api/views.open`, payload, response => {
-		const data = response.json();
-		if (data.ok) {
-			res.end();
-		} else {
-			res.send('We have issues processing the request, contact the app admin');
+	const options = {
+		method: 'POST',
+		body: JSON.stringify(payload),
+		headers: {
+			'Content-Type': 'application/json',
+			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
 		}
-	});
+	};
+
+	return fetch(`https://slack.com/api/views.open`, options)
+		.then(response => response.json())
+		.then(data => {
+			console.log('D::', data);
+
+			if (data.ok) {
+				res.end();
+			} else {
+				res.send('We have issues processing the request, contact the app admin');
+			}
+		})
+		.catch(err => console.log(err));
 });
 
 app.post('/submit', async (req, res) => {
@@ -57,14 +71,14 @@ app.post('/submit', async (req, res) => {
 });
 
 async function modalResponse(req, res) {
-	const private_metadata = JSON.parse(response.view.private_metadata);
-	const response_url = private_metadata.response_url;
 	const response = JSON.parse(req.body.payload);
 	const user = response.user.name;
 	const viewID = response.view.id;
 	const values = response.view.state.values;
 	const submission = Input.submit(viewID, user, values);
 	const response_msg_process = Structure.processing(submission.productName);
+	const private_metadata = JSON.parse(response.view.private_metadata);
+	const response_url = private_metadata.response_url;
 
 	Util.postJSONData(response_url, response_msg_process);
 

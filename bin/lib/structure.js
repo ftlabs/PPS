@@ -18,9 +18,9 @@ function formatOptions(arr) {
 	return options;
 }
 
-function build(triggerID, private_metadata) {
-	const missions = DataRequest.getMissions();
-	const types = DataRequest.getTypes();
+async function build(triggerID, private_metadata) {
+	const missions = await DataRequest.getMissions();
+	const types = await DataRequest.getTypes();
 	const payload = {
 		trigger_id: triggerID,
 		view: {
