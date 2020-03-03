@@ -125,7 +125,7 @@ You will need:
 
 ### Live
 
-Copy the same steps as Live but use Live URLs for each of the endpoints, interactive components etc
+Copy the same steps as Local but use Live URLs for each of the endpoints, interactive components etc
 
 **N.B.** It'd be a good idea to make sure the names of your test and live apps are distinct enough taht you (or any collaborators) don't make changes to the wrong one by accident.
 
