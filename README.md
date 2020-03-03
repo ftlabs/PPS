@@ -95,7 +95,7 @@ You will need:
     - It's located in the URL of the new sheet you just created - `docs.google.com/spreadsheets/d/*ID WILL BE HERE*/edit#gid=123456789`
   - Copy the sheet ID into the **SHEET_ID** varaible in `.env`
 - Setup Google keyfile.json
-  - In the Google Cloud Console, go to the Create service account key page. https://console.cloud.google.com/apis/credentials/serviceaccountkey?_ga=2.198753775.1535299209.1583157818-554392514.1569599724
+  - In the Google Cloud Console, go to the Create service account key page. [https://console.cloud.google.com/apis/](https://console.cloud.google.com/apis/)
   - From the Service account list, select New service account.
   - In the Service account name field, enter a name.
   - From the Role list, select Project > Editor.
