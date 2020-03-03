@@ -41,7 +41,6 @@ app.post('/add', (req, res) => {
 		if (data.ok) {
 			res.end();
 		} else {
-			//TODO: throw Error here and focus the error handling throughout the app.
 			res.send('We have issues processing the request, contact the app admin');
 		}
 	});
@@ -58,12 +57,12 @@ app.post('/submit', async (req, res) => {
 });
 
 async function modalResponse(req, res) {
+	const private_metadata = JSON.parse(response.view.private_metadata);
+	const response_url = private_metadata.response_url;
 	const response = JSON.parse(req.body.payload);
 	const user = response.user.name;
 	const viewID = response.view.id;
 	const values = response.view.state.values;
-	const private_metadata = JSON.parse(response.view.private_metadata);
-	const response_url = private_metadata.response_url;
 	const submission = Input.submit(viewID, user, values);
 	const response_msg_process = Structure.processing(submission.productName);
 
@@ -86,14 +85,13 @@ app.post('/summary', async (req, res) => {
 	const response_url = req.body.response_url;
 	const titles = await DataReq.getReportTitles();
 
-	if (parameter === '') {
-		return res.json(Structure.summaryList(titles));
-	} else if (parameter && titles.includes(parameter)) {
+	if (parameter && titles.includes(parameter)) {
 		Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
 			postSummary(response_url, parameter, headers, data, worksheet_id);
 		});
-
 		return res.json(Structure.processingReport(parameter));
+	} else if (parameter === '') {
+		return res.json(Structure.summaryList(titles));
 	} else {
 		return res.json(Structure.error('No summary by that name'));
 	}

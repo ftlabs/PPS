@@ -129,26 +129,6 @@ function build(triggerID, private_metadata) {
 	return payload;
 }
 
-function clear() {
-	return {
-		response_action: 'clear'
-	};
-}
-
-function processing(productName) {
-	return {
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: `New row request for *${productName}* received. Processing...`
-				}
-			}
-		]
-	};
-}
-
 function confirm({ ...values }) {
 	return {
 		blocks: [
@@ -157,56 +137,6 @@ function confirm({ ...values }) {
 				text: {
 					type: 'mrkdwn',
 					text: `Added row: \`\`\`${values.mission} | ${values.releasetype} | ${values.productname} | ${values.productphase} | ${values.releasedate}\`\`\``
-				}
-			}
-		]
-	};
-}
-
-function processingReport(reportName) {
-	return {
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: `Report request for *${reportName}* received. Processing...`
-				}
-			}
-		]
-	};
-}
-
-function summaryList(values) {
-	const options = [];
-
-	values.forEach(item => {
-		options.push({
-			text: {
-				type: 'plain_text',
-				text: `${item}`,
-				emoji: true
-			},
-			value: `report||${item}`
-		});
-	});
-
-	return {
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: 'PPS summaries available: '
-				},
-				accessory: {
-					type: 'static_select',
-					placeholder: {
-						type: 'plain_text',
-						text: 'Select an item',
-						emoji: true
-					},
-					options: options
 				}
 			}
 		]
@@ -257,6 +187,42 @@ async function summary(name, headers, rows, worksheet_id) {
 	};
 }
 
+function summaryList(values) {
+	const options = [];
+
+	values.forEach(item => {
+		options.push({
+			text: {
+				type: 'plain_text',
+				text: `${item}`,
+				emoji: true
+			},
+			value: `report||${item}`
+		});
+	});
+
+	return {
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: 'PPS summaries available: '
+				},
+				accessory: {
+					type: 'static_select',
+					placeholder: {
+						type: 'plain_text',
+						text: 'Select an item',
+						emoji: true
+					},
+					options: options
+				}
+			}
+		]
+	};
+}
+
 function getReport(name) {
 	return DataRequest.getReports().then(reports => {
 		const foundProps = reports.filter(report => {
@@ -268,14 +234,38 @@ function getReport(name) {
 	});
 }
 
-function createAsciiTable(headers, rows) {
-	let table = new AsciiTable();
-	table.setHeading(headers);
-	rows.forEach(row => {
-		table.addRow(row);
-	});
-	table.setTitleAlignLeft();
-	return table.toString();
+function clear() {
+	return {
+		response_action: 'clear'
+	};
+}
+
+function processing(productName) {
+	return {
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `New row request for *${productName}* received. Processing...`
+				}
+			}
+		]
+	};
+}
+
+function processingReport(reportName) {
+	return {
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `Report request for *${reportName}* received. Processing...`
+				}
+			}
+		]
+	};
 }
 
 function error(value) {
@@ -299,14 +289,23 @@ function error(value) {
 	};
 }
 
+function createAsciiTable(headers, rows) {
+	let table = new AsciiTable();
+	table.setHeading(headers);
+	rows.forEach(row => {
+		table.addRow(row);
+	});
+	table.setTitleAlignLeft();
+	return table.toString();
+}
+
 module.exports = {
 	build,
-	processing,
 	confirm,
-	clear,
-	confirm,
-	processingReport,
-	summaryList,
 	summary,
+	summaryList,
+	clear,
+	processing,
+	processingReport,
 	error
 };
