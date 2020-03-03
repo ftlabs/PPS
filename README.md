@@ -129,6 +129,33 @@ Copy the same steps as Local but use Live URLs for each of the endpoints, intera
 
 **N.B.** It'd be a good idea to make sure the names of your test and live apps are distinct enough taht you (or any collaborators) don't make changes to the wrong one by accident.
 
+## Screenshots
+
+**Project Status Update Form - Empty**
+![Project Status Update Form Empty](/docs/img/status_update_form_empty.png?raw=true 'Project Status Update Form Empty')
+
+---
+
+**Project Status Update Form - Filled in**
+![Project Status Update Form Filled in](/docs/img/status_update_form_full.png?raw=true 'Project Status Update Form Filled in')
+
+---
+
+**Project Status Update Form - response confirmation message**
+![Project Status Update confirmation](/docs/img/status_update_confirmation.png?raw=true 'Project Status Update confirmation')
+
+---
+
+**Project summary - selection list**
+![Project summary selection](/docs/img/summary_selection.png?raw=true 'Project summary selection')
+
+---
+
+**Project summary - returned report**
+![Project summary returned report](/docs/img/summary_response.png?raw=true 'Project summary returned report')
+
+---
+
 ## Todo (future iterations)
 
 - Tie google sheet to channel to make the app flexible for multiple teams
