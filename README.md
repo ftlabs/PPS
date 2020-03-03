@@ -142,3 +142,4 @@ Copy the same steps as Live but use Live URLs for each of the endpoints, interac
 - PPS is already added to Slack, and works in any channel.
 - At this stage of development, the messages are only visible to users who triggered them, and not the whole channel; it is however recommended to use a private channel for testing purposes.
 - You can stop the app after changes and run `npm start` again without stopping ngrok, which will make testing easier.
+- Slack has a response timeout of 3 seconds, which is why the Slack provided _request_url_ is utilised to send responses to longer requests outside of that timeout window
