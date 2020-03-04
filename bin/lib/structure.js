@@ -187,9 +187,13 @@ async function summary(name, headers, rows, worksheet_id) {
 	};
 }
 
-function summaryList(values) {
+function summaryList(values, message = '') {
 	const options = [];
+	const output = {
+		blocks: []
+	};
 
+	// Generate list of Report options for Slack drop down list
 	values.forEach(item => {
 		options.push({
 			text: {
@@ -201,26 +205,36 @@ function summaryList(values) {
 		});
 	});
 
-	return {
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: 'PPS summaries available: '
-				},
-				accessory: {
-					type: 'static_select',
-					placeholder: {
-						type: 'plain_text',
-						text: 'Select an item',
-						emoji: true
-					},
-					options: options
-				}
+	// Add message section if message has been provided
+	if (message && message !== '') {
+		output.blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `${message}`
 			}
-		]
-	};
+		});
+	}
+
+	// Add drop down list of Reports to response
+	output.blocks.push({
+		type: 'section',
+		text: {
+			type: 'mrkdwn',
+			text: 'PPS summaries available: '
+		},
+		accessory: {
+			type: 'static_select',
+			placeholder: {
+				type: 'plain_text',
+				text: 'Select an item',
+				emoji: true
+			},
+			options: options
+		}
+	});
+
+	return output;
 }
 
 function getReport(name) {
