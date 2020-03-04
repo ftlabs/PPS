@@ -99,8 +99,8 @@ function build(triggerID, private_metadata) {
 				type: 'plain_text',
 				text: 'Cancel'
 			},
-			"private_metadata": JSON.stringify(private_metadata),
-			"blocks": [
+			private_metadata: JSON.stringify(private_metadata),
+			blocks: [
 				{
 					type: 'input',
 					block_id: 'mission',
@@ -225,9 +225,13 @@ function confirm({ ...values }) {
 	};
 }
 
-function summaryList(values) {
+function summaryList(values, message = '') {
 	const options = [];
+	const output = {
+		blocks: []
+	};
 
+	// Generate list of Report options for Slack drop down list
 	values.forEach(item => {
 		options.push({
 			text: {
@@ -239,26 +243,36 @@ function summaryList(values) {
 		});
 	});
 
-	return {
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: 'PPS summaries available: '
-				},
-				accessory: {
-					type: 'static_select',
-					placeholder: {
-						type: 'plain_text',
-						text: 'Select an item',
-						emoji: true
-					},
-					options: options
-				}
+	// Add message section if message has been provided
+	if (message && message !== '') {
+		output.blocks.push({
+			type: 'section',
+			text: {
+				type: 'mrkdwn',
+				text: `${message}`
 			}
-		]
-	};
+		});
+	}
+
+	// Add drop down list of Reports to response
+	output.blocks.push({
+		type: 'section',
+		text: {
+			type: 'mrkdwn',
+			text: 'PPS summaries available: '
+		},
+		accessory: {
+			type: 'static_select',
+			placeholder: {
+				type: 'plain_text',
+				text: 'Select an item',
+				emoji: true
+			},
+			options: options
+		}
+	});
+
+	return output;
 }
 
 function summary(name, headers, rows, worksheet_id) {
