@@ -156,6 +156,21 @@ Copy the same steps as Local but use Live URLs for each of the endpoints, intera
 
 ---
 
+## Create new reports
+
+How to add new reports to the spreadsheet to make them available in Slack.
+
+- Open your Google Spreadsheet
+- Create a new tab
+- Give it a name, e.g. _new_report_
+- Update the new sheet with the info you would like in the report
+- Add the name of your new report, _new_report_, to the list in the _Report_ sheet
+- The report will now be available though the _/summary_ slash command
+
+A few things to bear in mind:
+
+- Slack will wrap the report ASCII tables if they are too wide, there's an approx row width of 70-80 characters
+
 ## Todo (future iterations)
 
 - Tie google sheet to channel to make the app flexible for multiple teams
