@@ -90,7 +90,7 @@ You will need:
 - Create a new .env file
   - Run `cp .env_example .env` to do this via command line
 - Setup Google Worksheet
-  - Create a new sheet copying from the template (XXXX)
+  - Create a new sheet copying from the template [https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598](https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598)
   - Get ID of your new sheet
     - It's located in the URL of the new sheet you just created - `docs.google.com/spreadsheets/d/*ID WILL BE HERE*/edit#gid=123456789`
   - Copy the sheet ID into the **SHEET_ID** varaible in `.env`
