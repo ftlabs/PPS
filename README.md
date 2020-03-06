@@ -90,9 +90,9 @@ You will need:
 - Create a new .env file
   - Run `cp .env_example .env` to do this via command line
 - Setup Google Worksheet
-  - Create a new sheet copying from the template [https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598](https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598)
+  - Create a new sheet copying from the template, or duplicating it into your own work space [https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598](https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598)
   - Get ID of your new sheet
-    - It's located in the URL of the new sheet you just created - `docs.google.com/spreadsheets/d/*ID WILL BE HERE*/edit#gid=123456789`
+    - ID is located in the URL of the new sheet you just created - `docs.google.com/spreadsheets/d/*ID WILL BE HERE*/edit#gid=123456789`
   - Copy the sheet ID into the **SHEET_ID** varaible in `.env`
 - Setup Google keyfile.json
   - In the Google Cloud Console, go to the Create service account key page. [https://console.cloud.google.com/apis/](https://console.cloud.google.com/apis/)
