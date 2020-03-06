@@ -162,7 +162,7 @@ How to add new reports to the spreadsheet to make them available in Slack.
 
 - Open your Google Spreadsheet
 - Create a new tab
-- Give it a name without spaces, e.g. _new_report_
+- Give it a name (without spaces), e.g. _new_report_
 - Update the new sheet with the info you would like in the report
 - Add the name of your new report, _new_report_, to the list in the _Report_ sheet
 - The report will now be available though the _/summary_ slash command
