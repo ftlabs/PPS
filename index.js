@@ -167,26 +167,4 @@ async function postSummary(url, name, headers, data, worksheet_id) {
 	Util.postJSONData(url, summary);
 }
 
-// ----------------------------------------------------------------------------
-// Post JSON data to Slack
-// ----------------------------------------------------------------------------
-async function postData(url, data) {
-	const options = {
-		method: 'POST',
-		body: JSON.stringify(data),
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
-		}
-	};
-
-	return fetch(url, options)
-		.then(response => {
-			if (response.error != null) {
-				throw error;
-			}
-		})
-		.catch(err => console.log(err));
-}
-
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
