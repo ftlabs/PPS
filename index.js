@@ -118,13 +118,13 @@ app.post('/summary', async (req, res) => {
 	const titles = await DataReq.getReportTitles();
 
 	if (parameter && titles.includes(parameter)) {
-    // Send specifically requested Report
+		// Send specifically requested Report
 		Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
 			postSummary(response_url, parameter, headers, data, worksheet_id);
 		});
 		return res.json(Structure.processingReport(parameter));
 	} else if (parameter === '') {
-    // Send list of current available Reports
+		// Send list of current available Reports
 		return res.json(Structure.summaryList(titles));
 	} else {
 		return res.json(Structure.summaryList(titles, 'No summary by that name'));
@@ -161,7 +161,7 @@ async function postSummary(url, name, headers, data, worksheet_id) {
 		}
 		rows.push(row);
 	});
-  
+
 	const summary = await Structure.summary(name, headers, rows, worksheet_id);
 
 	Util.postJSONData(url, summary);
