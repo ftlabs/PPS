@@ -90,9 +90,9 @@ You will need:
 - Create a new .env file
   - Run `cp .env_example .env` to do this via command line
 - Setup Google Worksheet
-  - Create a new sheet copying from the template (XXXX)
+  - Create a new sheet copying from the template, or duplicating it into your own work space [https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598](https://docs.google.com/spreadsheets/d/1BTNl5c8tj89jTEhEDw-JuKcaVD7N5tsqa2qFtVaZnTs/edit#gid=1526353598)
   - Get ID of your new sheet
-    - It's located in the URL of the new sheet you just created - `docs.google.com/spreadsheets/d/*ID WILL BE HERE*/edit#gid=123456789`
+    - ID is located in the URL of the new sheet you just created - `docs.google.com/spreadsheets/d/*ID WILL BE HERE*/edit#gid=123456789`
   - Copy the sheet ID into the **SHEET_ID** varaible in `.env`
 - Setup Google keyfile.json
   - In the Google Cloud Console, go to the Create service account key page. [https://console.cloud.google.com/apis/](https://console.cloud.google.com/apis/)
@@ -155,6 +155,21 @@ Copy the same steps as Local but use Live URLs for each of the endpoints, intera
 ![Project summary returned report](/docs/img/summary_response.png?raw=true 'Project summary returned report')
 
 ---
+
+## Create new reports
+
+How to add new reports to the spreadsheet to make them available in Slack.
+
+- Open your Google Spreadsheet
+- Create a new tab
+- Give it a name (without spaces), e.g. _new_report_
+- Update the new sheet with the info you would like in the report
+- Add the name of your new report, _new_report_, to the list in the _Report_ sheet
+- The report will now be available though the _/summary_ slash command
+
+A few things to bear in mind:
+
+- Slack will wrap the report ASCII tables if they are too wide, there's an approx row width of 70-80 characters
 
 ## Todo (future iterations)
 

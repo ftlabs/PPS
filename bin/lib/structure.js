@@ -1,70 +1,6 @@
-const Sheet = require('./sheets');
 const Utils = require('./utils');
+const DataRequest = require('./dataRequest');
 const AsciiTable = require('ascii-table');
-
-async function init() {
-	this.missionValues = await getValues('Mission');
-	this.typeValues = await getValues('Type');
-	this.reportValues = await getReportValues('Report');
-
-	return this;
-}
-
-async function getValues(sheetName) {
-	return new Promise((resolve, reject) => {
-		Sheet.read(sheetName, 'value', false, data => {
-			const output = [];
-			data.forEach(item => {
-				output.push(item.value);
-			});
-
-			resolve(output);
-		});
-	});
-}
-
-async function getReportValues(sheetName) {
-	return new Promise((resolve, reject) => {
-		Sheet.read(sheetName, 'value', false, data => {
-			const output = [];
-			data.forEach(item => {
-				output.push({
-					title: item.title,
-					description: item.description
-				});
-			});
-
-			resolve(output);
-		});
-	});
-}
-
-function getMissions() {
-	return this.missionValues;
-}
-
-function getTypes() {
-	return this.typeValues;
-}
-
-function getReports() {
-	return this.reportValues;
-}
-
-function getReportTitles() {
-	return this.reportValues.map(report => {
-		return report.title;
-	});
-}
-
-function getReport(reportValues, name) {
-	const foundProps = reportValues.filter(obj => {
-		if (obj.title === name) {
-			return obj;
-		}
-	});
-	return foundProps[0];
-}
 
 function formatOptions(arr) {
 	const options = [];
@@ -82,7 +18,9 @@ function formatOptions(arr) {
 	return options;
 }
 
-function build(triggerID, private_metadata) {
+async function build(triggerID, private_metadata) {
+	const missions = await DataRequest.getMissions();
+	const types = await DataRequest.getTypes();
 	const payload = {
 		trigger_id: triggerID,
 		view: {
@@ -111,7 +49,7 @@ function build(triggerID, private_metadata) {
 							type: 'plain_text',
 							text: 'Pick a Mission'
 						},
-						options: formatOptions(this.missionValues)
+						options: formatOptions(missions)
 					},
 					label: {
 						type: 'plain_text',
@@ -128,7 +66,7 @@ function build(triggerID, private_metadata) {
 							type: 'plain_text',
 							text: 'Pick a Type'
 						},
-						options: formatOptions(this.typeValues)
+						options: formatOptions(types)
 					},
 					label: {
 						type: 'plain_text',
@@ -191,26 +129,6 @@ function build(triggerID, private_metadata) {
 	return payload;
 }
 
-function clear() {
-	return {
-		response_action: 'clear'
-	};
-}
-
-function processing(productName) {
-	return {
-		blocks: [
-			{
-				type: 'section',
-				text: {
-					type: 'mrkdwn',
-					text: `New row request for *${productName}* received. Processing...`
-				}
-			}
-		]
-	};
-}
-
 function confirm({ ...values }) {
 	return {
 		blocks: [
@@ -220,6 +138,50 @@ function confirm({ ...values }) {
 					type: 'mrkdwn',
 					text: `Added row: \`\`\`${values.mission} | ${values.releasetype} | ${values.productname} | ${values.productphase} | ${values.releasedate}\`\`\``
 				}
+			}
+		]
+	};
+}
+
+async function summary(name, headers, rows, worksheet_id) {
+	const { title, description } = await getReport(name);
+
+	const table = createAsciiTable(headers, rows);
+	return {
+		blocks: [
+			{
+				type: 'divider'
+			},
+			{
+				type: 'context',
+				elements: [
+					{
+						type: 'mrkdwn',
+						text: `${title} report requested on ${Utils.dateFormat(
+							new Date()
+						)} \n Full report: https://docs.google.com/spreadsheets/d/${process.env.SHEET_ID}/edit#gid=${worksheet_id}`
+					}
+				]
+			}
+		],
+		attachments: [
+			{
+				blocks: [
+					{
+						type: 'section',
+						text: {
+							type: 'mrkdwn',
+							text: `*${description}*`
+						}
+					},
+					{
+						type: 'section',
+						text: {
+							type: 'mrkdwn',
+							text: `\`\`\`${table}\`\`\``
+						}
+					}
+				]
 			}
 		]
 	};
@@ -275,57 +237,49 @@ function summaryList(values, message = '') {
 	return output;
 }
 
-function summary(name, headers, rows, worksheet_id) {
-	const { title, description } = getReport(this.reportValues, name);
-	const table = createAsciiTable(title, headers, rows);
+function getReport(name) {
+	return DataRequest.getReports().then(reports => {
+		const foundProps = reports.filter(report => {
+			if (report.title === name) {
+				return report;
+			}
+		});
+		return foundProps[0];
+	});
+}
+
+function clear() {
+	return {
+		response_action: 'clear'
+	};
+}
+
+function processing(productName) {
 	return {
 		blocks: [
 			{
-				type: 'divider'
-			},
-			{
-				type: 'context',
-				elements: [
-					{
-						type: 'mrkdwn',
-						text: `${title} report requested on ${Utils.dateFormat(
-							new Date()
-						)} \n Full report: https://docs.google.com/spreadsheets/d/${process.env.SHEET_ID}/edit#gid=${worksheet_id}`
-					}
-				]
-			}
-		],
-		attachments: [
-			{
-				blocks: [
-					{
-						type: 'section',
-						text: {
-							type: 'mrkdwn',
-							text: `*${description}*`
-						}
-					},
-					{
-						type: 'section',
-						text: {
-							type: 'mrkdwn',
-							text: `\`\`\`${table}\`\`\``
-						}
-					}
-				]
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `New row request for *${productName}* received. Processing...`
+				}
 			}
 		]
 	};
 }
 
-function createAsciiTable(title, headers, rows) {
-	let table = new AsciiTable();
-	table.setHeading(headers);
-	rows.forEach(row => {
-		table.addRow(row);
-	});
-	table.setTitleAlignLeft();
-	return table.toString();
+function processingReport(reportName) {
+	return {
+		blocks: [
+			{
+				type: 'section',
+				text: {
+					type: 'mrkdwn',
+					text: `Report request for *${reportName}* received. Processing...`
+				}
+			}
+		]
+	};
 }
 
 function error(value) {
@@ -349,18 +303,23 @@ function error(value) {
 	};
 }
 
+function createAsciiTable(headers, rows) {
+	let table = new AsciiTable();
+	table.setHeading(headers);
+	rows.forEach(row => {
+		table.addRow(row);
+	});
+	table.setTitleAlignLeft();
+	return table.toString();
+}
+
 module.exports = {
-	init,
-	getMissions,
-	getTypes,
-	getReports,
-	getReportTitles,
 	build,
-	processing,
 	confirm,
-	clear,
-	confirm,
-	summaryList,
 	summary,
+	summaryList,
+	clear,
+	processing,
+	processingReport,
 	error
 };

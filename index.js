@@ -11,9 +11,11 @@ const fetch = require('node-fetch');
 
 const PORT = process.env.PORT || 2020;
 
+const Util = require('./bin/lib/utils');
 const Sheet = require('./bin/lib/sheets');
 const Structure = require('./bin/lib/structure');
 const Input = require('./bin/lib/inputManagement');
+const DataReq = require('./bin/lib/dataRequest');
 
 if (process.env.NODE_ENV === 'production') {
 	app.use(helmet());
@@ -26,18 +28,17 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-setUpStructure();
 
 // ----------------------------------------------------------------------------
 // Endpoint for handling /add slash commands from Slack
 // ----------------------------------------------------------------------------
-app.post('/add', (req, res) => {
+app.post('/add', async (req, res) => {
 	const private_metadata = {
 		channel: req.body.channel,
 		response_url: req.body.response_url
 	};
 
-	const payload = Structure.build(req.body.trigger_id, private_metadata);
+	const payload = await Structure.build(req.body.trigger_id, private_metadata);
 
 	const options = {
 		method: 'POST',
@@ -56,7 +57,6 @@ app.post('/add', (req, res) => {
 			if (data.ok) {
 				res.end();
 			} else {
-				//TODO: throw Error here and focus the error handling throughout the app.
 				res.send('We have issues processing the request, contact the app admin');
 			}
 		})
@@ -84,14 +84,14 @@ async function modalResponse(req, res) {
 	const user = response.user.name;
 	const viewID = response.view.id;
 	const values = response.view.state.values;
+	const submission = Input.submit(viewID, user, values);
+	const response_msg_process = Structure.processing(submission.productName);
 	const private_metadata = JSON.parse(response.view.private_metadata);
 	const response_url = private_metadata.response_url;
-	const submission = Input.submit(viewID, user, values);
 
 	// 1. Send a Slack message to the user confirming reception
 	//    of the add entry request
-	const response_msg_process = Structure.processing(submission.productName);
-	postData(response_url, response_msg_process);
+	Util.postJSONData(response_url, response_msg_process);
 
 	if (submission) {
 		Sheet.write(submission, data => {
@@ -101,7 +101,7 @@ async function modalResponse(req, res) {
 			// 2. Send a Slack message confirming that the contents
 			//    of the request was added to the data store
 			const response_msg_confirm = Structure.confirm(data);
-			postData(response_url, response_msg_confirm);
+			Util.postJSONData(response_url, response_msg_confirm);
 		});
 	}
 
@@ -115,22 +115,20 @@ async function modalResponse(req, res) {
 app.post('/summary', async (req, res) => {
 	const parameter = req.body.text;
 	const response_url = req.body.response_url;
-	const titles = Structure.getReportTitles();
+	const titles = await DataReq.getReportTitles();
 
-	if (parameter === '') {
+	if (parameter && titles.includes(parameter)) {
+		// Send specifically requested Report
+		Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
+			postSummary(response_url, parameter, headers, data, worksheet_id);
+		});
+		return res.json(Structure.processingReport(parameter));
+	} else if (parameter === '') {
 		// Send list of current available Reports
 		return res.json(Structure.summaryList(titles));
-	} else if (parameter && titles.includes(parameter)) {
-		// Send specifically requested Report
-		return await Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
-			postSummary(response_url, parameter, headers, data, worksheet_id);
-			return res.sendStatus(200);
-		});
 	} else {
 		return res.json(Structure.summaryList(titles, 'No summary by that name'));
 	}
-
-	return res.json(Structure.clear());
 });
 
 // ----------------------------------------------------------------------------
@@ -141,10 +139,11 @@ async function summaryResponse(req, res) {
 	const parameter = parsedPayload.actions[0].selected_option.text.text;
 	const response_url = parsedPayload.response_url;
 
-	return await Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
+	Sheet.read(parameter, 'value', true, (data, headers, worksheet_id) => {
 		postSummary(response_url, parameter, headers, data, worksheet_id);
-		return res.sendStatus(200);
 	});
+
+	return res.json(Structure.processingReport(parameter));
 }
 
 // ----------------------------------------------------------------------------
@@ -163,36 +162,9 @@ async function postSummary(url, name, headers, data, worksheet_id) {
 		rows.push(row);
 	});
 
-	postData(url, Structure.summary(name, headers, rows, worksheet_id));
-}
+	const summary = await Structure.summary(name, headers, rows, worksheet_id);
 
-// ----------------------------------------------------------------------------
-// Post JSON data to Slack
-// ----------------------------------------------------------------------------
-async function postData(url, data) {
-	const options = {
-		method: 'POST',
-		body: JSON.stringify(data),
-		headers: {
-			'Content-Type': 'application/json',
-			Authorization: 'Bearer ' + process.env.SLACK_TOKEN
-		}
-	};
-
-	return fetch(url, options)
-		.then(response => {
-			if (response.error != null) {
-				throw error;
-			}
-		})
-		.catch(err => console.log(err));
-}
-
-// ----------------------------------------------------------------------------
-// Setup JSON structures for templated Slack responses
-// ----------------------------------------------------------------------------
-async function setUpStructure() {
-	await Structure.init();
+	Util.postJSONData(url, summary);
 }
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
